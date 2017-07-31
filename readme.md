@@ -6,7 +6,7 @@ of 80.8(about two points better than the result of pvanet in the paper, see http
 slow because of the use of shapely in python, this can be further improved.
 
 Thanks for the author's(@zxytim) help!
-Please site his [paper](https://arxiv.org/abs/1704.03155) if find this useful.
+Please site his [paper](https://arxiv.org/abs/1704.03155) if you find this useful.
 
 ### Contents
 1. [Installation](#installation)
