@@ -2,11 +2,11 @@
 
 ### Introduction
 This is an tensorflow implemention of EAST, I only reimplement the RBOX part of the paper, which achieves an F1 score
-of 80.8(about two points better than the result of pvanet in the paper, see http://rrc.cvc.uab.es/?ch=4&com=evaluation&task=1) on the ICDAR 2015 dataset, and the speed is about network(150ms) + nms(300ms) each image on a K40 card, the nms part is too 
+of 80.8(about two points better than the result of pvanet in the paper, see http://rrc.cvc.uab.es/?ch=4&com=evaluation&task=1) on the ICDAR 2015 dataset, and the speed is about network(150ms) + nms(300ms) each image on a K40 card, the nms part is too
 slow because of the use of shapely in python, this can be further improved.
 
 Thanks for the author's(@zxytim) help!
-Please site his [paper](https://arxiv.org/abs/1704.03155) if you find this useful.
+Please site his [paper](https://arxiv.org/abs/1704.03155v2) if you find this useful.
 
 ### Contents
 1. [Installation](#installation)
