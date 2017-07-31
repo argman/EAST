@@ -1,11 +1,10 @@
 # EAST : An Efficient and Accurate Scene Text Detector
 
 ### Introduction
-This is an tensorflow implemention of EAST, I only reimplement the RBOX part of the paper, which achieves an F1 score
-of 80.8(about two points better than the result of pvanet in the paper, see http://rrc.cvc.uab.es/?ch=4&com=evaluation&task=1) on the ICDAR 2015 dataset, and the speed is about network(150ms) + nms(300ms) each image on a K40 card, the nms part is too
-slow because of the use of shapely in python, this can be further improved.
+This is a tensorflow implemention of EAST. I only reimplement the RBOX part of the paper, which achieves an F1 score
+of 80.8 on the ICDAR 2015 dataset (which is about two points better than the result of pvanet in the paper, see http://rrc.cvc.uab.es/?ch=4&com=evaluation&task=1). The running speed is about network(150ms) + nms(300ms) each image on a K40 card. The nms part is too slow because of the use of shapely in python, and can be further improved.
 
-Thanks for the author's(@zxytim) help!
+Thanks for the author's ([@zxytim](https://github.com/zxytim)) help!
 Please site his [paper](https://arxiv.org/abs/1704.03155v2) if you find this useful.
 
 ### Contents
@@ -23,7 +22,7 @@ Please site his [paper](https://arxiv.org/abs/1704.03155v2) if you find this use
 2. Resnet V1 50 provided by tensorflow slim: [slim resnet v1 50](http://download.tensorflow.org/models/resnet_v1_50_2016_08_28.tar.gz)
 
 ### Train
-if you want to train the model, you should provide the dataset path, in the dataset path, a separate gt text file should be provided for each image
+If you want to train the model, you should provide the dataset path, in the dataset path, a separate gt text file should be provided for each image
 and run
 
 ```
@@ -32,9 +31,9 @@ python multigpu_train.py --gpu_list=0 --input_size=512 --batch_size=14 --checkpo
 --pretrained_model_path=/tmp/resnet_v1_50.ckpt
 ```
 
-if you have more than one gpu, you can pass gpu ids to gpu_list
+If you have more than one gpu, you can pass gpu ids to gpu_list
 
-Note: you should change the gt text file of icdar2015's filename to img_*.txt instead of gt_img_*.txt(or you can change the code in icdar.py), and some extra characters should be removed from the file.
+**Note: you should change the gt text file of icdar2015's filename to img_\*.txt instead of gt_img_\*.txt(or you can change the code in icdar.py), and some extra characters should be removed from the file.**
 
 ### Test
 run
@@ -43,7 +42,7 @@ python eval.py --test_data_path=/tmp/images/ --gpu_list=0 --checkpoint_path=/tmp
 --output_path=/tmp/
 ```
 
-then a text file will be written to the output path
+a text file will be then written to the output path.
 
 
 ### Examples
