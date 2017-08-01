@@ -156,7 +156,7 @@ def main(argv=None):
 
                 # save to file
                 if boxes is not None:
-                    with open(FLAGS.output_path + 'res_{}.txt'.format(os.path.basename(im_fn).split('.')[0]), 'w') as f:
+                    with open(os.path.join(FLAGS.output_path, 'res_{}.txt'.format(os.path.basename(im_fn).split('.')[0])), 'w') as f:
                         for box in boxes:
                             # to avoid submitting errors
                             box = sort_poly(box.astype(np.int32))
