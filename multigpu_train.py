@@ -21,7 +21,7 @@ import icdar
 
 FLAGS = tf.app.flags.FLAGS
 
-gpus = range(len(FLAGS.gpu_list.split(',')))
+gpus = list(range(len(FLAGS.gpu_list.split(','))))
 
 
 def tower_loss(images, score_maps, geo_maps, training_masks, reuse_variables=None):
@@ -136,7 +136,7 @@ def main(argv=None):
                                                              ignore_missing_vars=True)
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         if FLAGS.restore:
-            print 'continue training from previous checkpoint'
+            print('continue training from previous checkpoint')
             ckpt = tf.train.latest_checkpoint(FLAGS.checkpoint_path)
             saver.restore(sess, ckpt)
         else:
@@ -149,22 +149,22 @@ def main(argv=None):
                                          batch_size=FLAGS.batch_size * len(gpus))
 
         start = time.time()
-        for step in xrange(FLAGS.max_steps):
-            data = data_generator.next()
+        for step in range(FLAGS.max_steps):
+            data = next(data_generator)
             ml, tl, _ = sess.run([model_loss, total_loss, train_op], feed_dict={input_images: data[0],
                                                                                 input_score_maps: data[2],
                                                                                 input_geo_maps: data[3],
                                                                                 input_training_masks: data[4]})
             if np.isnan(tl):
-                print 'Loss diverged, stop training'
+                print('Loss diverged, stop training')
                 break
 
             if step % 10 == 0:
                 avg_time_per_step = (time.time() - start)/10
                 avg_examples_per_second = (10 * FLAGS.batch_size * len(gpus))/(time.time() - start)
                 start = time.time()
-                print 'Step {:06d}, model loss {:.4f}, total loss {:.4f}, {:.2f} seconds/step, {:.2f} examples/second'.format(
-                    step, ml, tl, avg_time_per_step, avg_examples_per_second)
+                print('Step {:06d}, model loss {:.4f}, total loss {:.4f}, {:.2f} seconds/step, {:.2f} examples/second'.format(
+                    step, ml, tl, avg_time_per_step, avg_examples_per_second))
 
             if step % FLAGS.save_checkpoint_steps == 0:
                 saver.save(sess, FLAGS.checkpoint_path + 'model.ckpt', global_step=global_step)

@@ -60,5 +60,5 @@ def nms_locality(polys, thres=0.3):
 
 if __name__ == '__main__':
     # 343,350,448,135,474,143,369,359
-    print Polygon(np.array([[343, 350], [448, 135],
-                            [474, 143], [369, 359]])).area
+    print(Polygon(np.array([[343, 350], [448, 135],
+                            [474, 143], [369, 359]])).area)

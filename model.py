@@ -53,8 +53,8 @@ def model(images, weight_decay=1e-5, is_training=True):
                             weights_regularizer=slim.l2_regularizer(weight_decay)):
             f = [end_points['pool5'], end_points['pool4'],
                  end_points['pool3'], end_points['pool2']]
-            for i in xrange(4):
-                print 'Shape of f_{} {}'.format(i, f[i].shape)
+            for i in range(4):
+                print('Shape of f_{} {}'.format(i, f[i].shape))
             g = [None, None, None, None]
             h = [None, None, None, None]
             num_outputs = [None, 128, 64, 32]
@@ -68,7 +68,7 @@ def model(images, weight_decay=1e-5, is_training=True):
                     g[i] = unpool(h[i])
                 else:
                     g[i] = slim.conv2d(h[i], num_outputs[i], 3)
-                print 'Shape of h_{} {}, g_{} {}'.format(i, h[i].shape, i, g[i].shape)
+                print('Shape of h_{} {}, g_{} {}'.format(i, h[i].shape, i, g[i].shape))
 
             # here we use a slightly different way for regression part,
             # we first use a sigmoid to limit the regression range, and also

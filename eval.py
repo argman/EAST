@@ -1,10 +1,12 @@
 import cv2
 import time
+import math
 import os
 import numpy as np
 import tensorflow as tf
 
 import locality_aware_nms as nms_locality
+import lanms
 
 tf.app.flags.DEFINE_string('test_data_path', '/tmp/ch4_test_images/images/', '')
 tf.app.flags.DEFINE_string('gpu_list', '0', '')
@@ -29,7 +31,7 @@ def get_images():
                 if filename.endswith(ext):
                     files.append(os.path.join(parent, filename))
                     break
-    print 'Find {} images'.format(len(files))
+    print('Find {} images'.format(len(files)))
     return files
 
 
@@ -53,8 +55,8 @@ def resize_image(im, max_side_len=2400):
     resize_h = int(resize_h * ratio)
     resize_w = int(resize_w * ratio)
 
-    resize_h = resize_h if resize_h % 32 == 0 else (resize_h / 32 - 1) * 32
-    resize_w = resize_w if resize_w % 32 == 0 else (resize_w / 32 - 1) * 32
+    resize_h = resize_h if resize_h % 32 == 0 else (resize_h // 32 - 1) * 32
+    resize_w = resize_w if resize_w % 32 == 0 else (resize_w // 32 - 1) * 32
     im = cv2.resize(im, (int(resize_w), int(resize_h)))
 
     ratio_h = resize_h / float(h)
@@ -84,14 +86,15 @@ def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_
     # restore
     start = time.time()
     text_box_restored = restore_rectangle(xy_text[:, ::-1]*4, geo_map[xy_text[:, 0], xy_text[:, 1], :]) # N*4*2
-    print '{} text boxes before nms'.format(text_box_restored.shape[0])
+    print('{} text boxes before nms'.format(text_box_restored.shape[0]))
     boxes = np.zeros((text_box_restored.shape[0], 9), dtype=np.float32)
     boxes[:, :8] = text_box_restored.reshape((-1, 8))
     boxes[:, 8] = score_map[xy_text[:, 0], xy_text[:, 1]]
     timer['restore'] = time.time() - start
     # nms part
     start = time.time()
-    boxes = nms_locality.nms_locality(boxes.astype(np.float64), nms_thres)
+    # boxes = nms_locality.nms_locality(boxes.astype(np.float64), nms_thres)
+    boxes = lanms.merge_quadrangle_n9(boxes.astype('float32'), nms_thres)
     timer['nms'] = time.time() - start
 
     if boxes.shape[0] == 0:
@@ -100,7 +103,7 @@ def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_
     # here we filter some low score boxes by the average score map, this is different from the orginal paper
     for i, box in enumerate(boxes):
         mask = np.zeros_like(score_map, dtype=np.uint8)
-        cv2.fillPoly(mask, box[:8].reshape((-1, 4, 2)).astype(np.int32)/4, 1)
+        cv2.fillPoly(mask, box[:8].reshape((-1, 4, 2)).astype(np.int32) // 4, 1)
         boxes[i, 8] = cv2.mean(score_map, mask)[0]
     boxes = boxes[boxes[:, 8] > box_thresh]
 
@@ -132,7 +135,7 @@ def main(argv=None):
         with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
             ckpt_state = tf.train.get_checkpoint_state(FLAGS.checkpoint_path)
             model_path = os.path.join(FLAGS.checkpoint_path, os.path.basename(ckpt_state.model_checkpoint_path))
-            print 'Restore from {}'.format(model_path)
+            print('Restore from {}'.format(model_path))
             saver.restore(sess, model_path)
 
             im_fn_list = get_images()
@@ -146,8 +149,8 @@ def main(argv=None):
                 timer['net'] = time.time() - start
 
                 boxes, timer = detect(score_map=score, geo_map=geometry, timer=timer)
-                print '{} : net {:.0f}ms, restore {:.0f}ms, nms {:.0f}ms'.format(
-                    im_fn, timer['net']*1000, timer['restore']*1000, timer['nms']*1000)
+                print('{} : net {:.0f}ms, restore {:.0f}ms, nms {:.0f}ms'.format(
+                    im_fn, timer['net']*1000, timer['restore']*1000, timer['nms']*1000))
 
                 if boxes is not None:
                     boxes = boxes[:, :8].reshape((-1, 4, 2))

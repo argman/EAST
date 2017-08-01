@@ -54,7 +54,7 @@ def load_annoataion(p):
         reader = csv.reader(f)
         for line in reader:
             label = line[-1]
-            x1, y1, x2, y2, x3, y3, x4, y4 = map(float, line[:8])
+            x1, y1, x2, y2, x3, y3, x4, y4 = list(map(float, line[:8]))
             text_polys.append([[x1, y1], [x2, y2], [x3, y3], [x4, y4]])
             if label == '*' or label == '###':
                 text_tags.append(True)
@@ -78,7 +78,7 @@ def polygon_area(poly):
     return np.sum(edge)/2.
 
 
-def check_and_validate_polys(polys, tags, (h, w)):
+def check_and_validate_polys(polys, tags, xxx_todo_changeme):
     '''
     check so that the text poly is in the same direction,
     and also filter some invalid polygons
@@ -86,6 +86,7 @@ def check_and_validate_polys(polys, tags, (h, w)):
     :param tags:
     :return:
     '''
+    (h, w) = xxx_todo_changeme
     if polys.shape[0] == 0:
         return polys
     polys[:, :, 0] = np.clip(polys[:, :, 0], 0, w-1)
@@ -97,10 +98,10 @@ def check_and_validate_polys(polys, tags, (h, w)):
         p_area = polygon_area(poly)
         if abs(p_area) < 1:
             # print poly
-            print 'invalid poly'
+            print('invalid poly')
             continue
         if p_area > 0:
-            print 'poly in wrong direction'
+            print('poly in wrong direction')
             poly = poly[(0, 3, 2, 1), :]
         validated_polys.append(poly)
         validated_tags.append(tag)
@@ -135,7 +136,7 @@ def crop_area(im, polys, tags, crop_background=False, max_tries=50):
     w_axis = np.where(w_array == 0)[0]
     if len(h_axis) == 0 or len(w_axis) == 0:
         return im, polys, tags
-    for i in xrange(max_tries):
+    for i in range(max_tries):
         xx = np.random.choice(w_axis, size=2)
         xmin = np.min(xx) - pad_w
         xmax = np.max(xx) - pad_w
@@ -255,10 +256,10 @@ def fit_line(p1, p2):
 def line_cross_point(line1, line2):
     # line1 0= ax+by+c, compute the cross point of line1 and line2
     if line1[0] != 0 and line1[0] == line2[0]:
-        print 'Cross point does not exist'
+        print('Cross point does not exist')
         return None
     if line1[0] == 0 and line2[0] == 0:
-        print 'Cross point does not exist'
+        print('Cross point does not exist')
         return None
     if line1[1] == 0:
         x = -line1[2]
@@ -362,7 +363,7 @@ def sort_rectangle(poly):
         angle = np.arctan(-(poly[p_lowest][1] - poly[p_lowest_right][1])/(poly[p_lowest][0] - poly[p_lowest_right][0]))
         # assert angle > 0
         if angle <= 0:
-            print angle, poly[p_lowest], poly[p_lowest_right]
+            print(angle, poly[p_lowest], poly[p_lowest_right])
         if angle/np.pi * 180 > 45:
             # 这个点为p2
             p2_index = p_lowest
@@ -467,7 +468,7 @@ def generate_rbox(im_size, polys, tags):
         tag = poly_tag[1]
 
         r = [None, None, None, None]
-        for i in xrange(4):
+        for i in range(4):
             r[i] = min(np.linalg.norm(poly[i] - poly[(i + 1) % 4]),
                        np.linalg.norm(poly[i] - poly[(i - 1) % 4]))
         # score map
@@ -486,7 +487,7 @@ def generate_rbox(im_size, polys, tags):
         # if geometry == 'RBOX':
         # 对任意两个顶点的组合生成一个平行四边形
         fitted_parallelograms = []
-        for i in xrange(4):
+        for i in range(4):
             p0 = poly[i]
             p1 = poly[(i + 1) % 4]
             p2 = poly[(i + 2) % 4]
@@ -548,7 +549,7 @@ def generate_rbox(im_size, polys, tags):
             new_p1 = line_cross_point(backward_opposite, edge)
             new_p2 = line_cross_point(backward_opposite, edge_opposite)
             fitted_parallelograms.append([new_p0, new_p1, new_p2, new_p3, new_p0])
-        areas = map(lambda t: Polygon(t).area, fitted_parallelograms)
+        areas = [Polygon(t).area for t in fitted_parallelograms]
         parallelogram = np.array(fitted_parallelograms[np.argmin(areas)][:-1], dtype=np.float32)
         # sort thie polygon
         parallelogram_coord_sum = np.sum(parallelogram, axis=1)
@@ -580,7 +581,7 @@ def generator(input_size=512, batch_size=32,
               random_scale=np.array([0.5, 1, 2.0, 3.0]),
               vis=False):
     image_list = np.array(get_images())
-    print '{} training images in {}'.format(image_list.shape[0], FLAGS.dataset)
+    print('{} training images in {}'.format(image_list.shape[0], FLAGS.dataset))
     index = np.arange(0, image_list.shape[0])
     while True:
         np.random.shuffle(index)
@@ -706,8 +707,8 @@ def generator(input_size=512, batch_size=32,
                     score_maps = []
                     geo_maps = []
                     training_masks = []
-            except Exception, e:
-                print e
+            except Exception as e:
+                print(e)
                 continue
 
 
@@ -734,5 +735,5 @@ def get_batch(num_workers=10, **kwargs):
 if __name__ == '__main__':
     gen = generator(input_size=512, batch_size=32, vis=True)
     while True:
-        images, image_fns, score_maps, geo_maps, training_masks = gen.next()
-        print len(images)
+        images, image_fns, score_maps, geo_maps, training_masks = next(gen)
+        print(len(images))
