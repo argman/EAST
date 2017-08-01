@@ -33,7 +33,8 @@ python multigpu_train.py --gpu_list=0 --input_size=512 --batch_size=14 --checkpo
 
 If you have more than one gpu, you can pass gpu ids to gpu_list
 
-**Note: you should change the gt text file of icdar2015's filename to img_\*.txt instead of gt_img_\*.txt(or you can change the code in icdar.py), and some extra characters should be removed from the file.**
+**Note: you should change the gt text file of icdar2015's filename to img_\*.txt instead of gt_img_\*.txt(or you can change the code in icdar.py), and some extra characters should be removed from the file.
+See the examples in training_samples/**
 
 ### Test
 run
@@ -47,10 +48,10 @@ a text file will be then written to the output path.
 
 ### Examples
 Here is some test examples on icdar2015, enjoy the beautiful text boxes!
-![image_1](Examples/img_2.jpg)
-![image_2](Examples/img_10.jpg)
-![image_3](Examples/img_14.jpg)
-![image_4](Examples/img_26.jpg)
-![image_5](Examples/img_75.jpg)
+![image_1](examples/img_2.jpg)
+![image_2](examples/img_10.jpg)
+![image_3](examples/img_14.jpg)
+![image_4](examples/img_26.jpg)
+![image_5](examples/img_75.jpg)
 
 Please let me know if you encounter any issues(my email boostczc@gmail dot com).
