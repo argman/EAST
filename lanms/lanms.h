@@ -37,15 +37,25 @@ namespace lanms {
 		return poly_iou(a, b) > iou_threshold;
 	}
 
+	/**
+	 * Incrementally merge polygons
+	 */
 	class PolyMerger {
 		public:
 			PolyMerger(): score(0), nr_polys(0) {
 				memset(data, 0, sizeof(data));
 			}
 
+			/**
+			 * Add a new polygon to be merged.
+			 */
 			void add(const Polygon &p_given) {
 				Polygon p;
 				if (nr_polys > 0) {
+					// vertices of two polygons to merge may not in the same order;
+					// we match their vertices by choosing the ordering that
+					// minimizes the total squared distance.
+					// see function normalize_poly for details.
 					p = normalize_poly(get(), p_given);
 				} else {
 					p = p_given;
@@ -156,86 +166,35 @@ namespace lanms {
 	};
 
 
-	class DisjointSet {
-		public:
-			DisjointSet(size_t size): m_parent(size) {
-				std::iota(std::begin(m_parent), std::end(m_parent), 0);
-			}
+	/**
+	 * The standard NMS algorithm.
+	 */
+	std::vector<Polygon> standard_nms(std::vector<Polygon> &polys, float iou_threshold) {
+		size_t n = polys.size();
+		if (n == 0)
+			return {};
+		std::vector<size_t> indices(n);
+		std::iota(std::begin(indices), std::end(indices), 0);
+		std::sort(std::begin(indices), std::end(indices), [&](size_t i, size_t j) { return polys[i].score > polys[j].score; });
 
-			bool test(size_t a, size_t b) {
-				assert(a < size() && b < size());
-				return get_root(a) == get_root(b);
-			}
-
-			void merge(size_t a, size_t b) {
-				assert(a < size() && b < size());
-				m_parent[get_root(a)] = get_root(b);
-			}
-
-			size_t get_root(size_t x) {
-				assert(x < size());
-				return x == m_parent[x] ? x : (m_parent[x] = get_root(m_parent[x]));
-			}
-
-			std::vector<std::vector<size_t>> get_groups() {
-				std::vector<std::pair<size_t, size_t>> root2id;
-				for (size_t i = 0; i < size(); i ++) {
-					root2id.emplace_back(std::make_pair(get_root(i), i));
-				}
-				std::sort(std::begin(root2id), std::end(root2id));
-
-				std::vector<std::vector<size_t>> groups;
-				size_t last_root = std::numeric_limits<size_t>::max();
-				for (auto &&p: root2id) {
-					if (last_root != p.first) {
-						groups.emplace_back();
-					}
-					auto &g = groups.back();
-					g.emplace_back(p.second);
-					last_root = p.first;
-				}
-				return groups;
-			}
-
-			inline size_t size() const {
-				return m_parent.size();
-			}
-
-
-		private:
-			std::vector<size_t> m_parent;
-	};
-
-
-	std::vector<Polygon> naive_merge(std::vector<Polygon> &polys, float iou_threshold) {
-		std::sort(std::begin(polys), std::end(polys),
-				[](const Polygon &a, const Polygon &b) {
-					return a.score > b.score;
-				});
-		auto n = polys.size();
-		DisjointSet ds(n);
-		for (size_t i = 0; i < n; i ++) {
-			for (size_t j = i + 1; j < n; j ++) {
-				if (ds.test(i, j))
-					continue;
-				if (should_merge(polys[i], polys[j], iou_threshold)) {
-					ds.merge(i, j);
+		std::vector<size_t> keep;
+		while (indices.size()) {
+			size_t p = 0, cur = indices[0];
+			keep.emplace_back(cur);
+			for (size_t i = 1; i < indices.size(); i ++) {
+				if (!should_merge(polys[cur], polys[indices[i]], iou_threshold)) {
+					indices[p ++] = indices[i];
 				}
 			}
+			indices.resize(p);
 		}
 
-		auto groups = ds.get_groups();
 		std::vector<Polygon> ret;
-		for (auto &&g: groups) {
-			PolyMerger merger;
-			for (auto &&i: g) {
-				merger.add(polys[i]);
-			}
-			ret.emplace_back(merger.get());
+		for (auto &&i: keep) {
+			ret.emplace_back(polys[i]);
 		}
-
 		return ret;
- 	}
+	}
 
 	std::vector<Polygon>
 		merge_quadrangle_n9(const float *data, size_t n, float iou_threshold) {
@@ -270,6 +229,6 @@ namespace lanms {
 					polys.emplace_back(poly);
 				}
 			}
-			return naive_merge(polys, iou_threshold);
+			return standard_nms(polys, iou_threshold);
 		}
 }

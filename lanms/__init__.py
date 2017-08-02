@@ -8,7 +8,7 @@ if subprocess.call(['make', '-C', BASE_DIR]) != 0:  # return value
     raise RuntimeError('Cannot compile lanms: {}'.format(BASE_DIR))
 
 
-def merge_quadrangle_n9(polys, thres=0.3, precision=1000):
+def merge_quadrangle_n9(polys, thres=0.3, precision=10000):
     from .adaptor import merge_quadrangle_n9 as nms_impl
     if len(polys) == 0:
         return np.array([], dtype='float32')
@@ -17,5 +17,4 @@ def merge_quadrangle_n9(polys, thres=0.3, precision=1000):
     ret = np.array(nms_impl(p, thres), dtype='float32')
     ret[:,:8] /= precision
     return ret
-
 

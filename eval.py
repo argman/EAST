@@ -11,7 +11,8 @@ import lanms
 tf.app.flags.DEFINE_string('test_data_path', '/tmp/ch4_test_images/images/', '')
 tf.app.flags.DEFINE_string('gpu_list', '0', '')
 tf.app.flags.DEFINE_string('checkpoint_path', '/tmp/east_icdar2015_resnet_v1_50_rbox/', '')
-tf.app.flags.DEFINE_string('output_path', '/tmp/ch4_test_images/images/', '')
+tf.app.flags.DEFINE_string('output_dir', '/tmp/ch4_test_images/images/', '')
+tf.app.flags.DEFINE_bool('no_write_images', False, 'do not write images')
 
 import model
 from icdar import restore_rectangle
@@ -123,6 +124,13 @@ def main(argv=None):
     import os
     os.environ['CUDA_VISIBLE_DEVICES'] = FLAGS.gpu_list
 
+
+    try:
+        os.makedirs(FLAGS.output_dir)
+    except OSError as e:
+        if e.errno != 17:
+            raise
+
     with tf.get_default_graph().as_default():
         input_images = tf.placeholder(tf.float32, shape=[None, None, None, 3], name='input_images')
         global_step = tf.get_variable('global_step', [], initializer=tf.constant_initializer(0), trainable=False)
@@ -141,6 +149,7 @@ def main(argv=None):
             im_fn_list = get_images()
             for im_fn in im_fn_list:
                 im = cv2.imread(im_fn)[:, :, ::-1]
+                start_time = time.time()
                 im_resized, (ratio_h, ratio_w) = resize_image(im)
 
                 timer = {'net': 0, 'restore': 0, 'nms': 0}
@@ -157,9 +166,17 @@ def main(argv=None):
                     boxes[:, :, 0] /= ratio_w
                     boxes[:, :, 1] /= ratio_h
 
+                duration = time.time() - start_time
+                print('[timing] {}'.format(duration))
+
                 # save to file
                 if boxes is not None:
-                    with open(FLAGS.output_path + 'res_{}.txt'.format(os.path.basename(im_fn).split('.')[0]), 'w') as f:
+                    res_file = os.path.join(
+                        FLAGS.output_dir,
+                        '{}.txt'.format(
+                            os.path.basename(im_fn).split('.')[0]))
+
+                    with open(res_file, 'w') as f:
                         for box in boxes:
                             # to avoid submitting errors
                             box = sort_poly(box.astype(np.int32))
@@ -169,7 +186,9 @@ def main(argv=None):
                                 box[0, 0], box[0, 1], box[1, 0], box[1, 1], box[2, 0], box[2, 1], box[3, 0], box[3, 1],
                             ))
                             cv2.polylines(im[:, :, ::-1], [box.astype(np.int32).reshape((-1, 1, 2))], True, color=(255, 255, 0), thickness=1)
-                cv2.imwrite(os.path.join(FLAGS.output_path, os.path.basename(im_fn)), im[:, :, ::-1])
+                if not FLAGS.no_write_images:
+                    img_path = os.path.join(FLAGS.output_dir, os.path.basename(im_fn))
+                    cv2.imwrite(img_path, im[:, :, ::-1])
 
 if __name__ == '__main__':
     tf.app.run()
