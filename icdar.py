@@ -581,7 +581,7 @@ def generator(input_size=512, batch_size=32,
               random_scale=np.array([0.5, 1, 2.0, 3.0]),
               vis=False):
     image_list = np.array(get_images())
-    print('{} training images in {}'.format(image_list.shape[0], FLAGS.dataset))
+    print '{} training images in {}'.format(image_list.shape[0], FLAGS.training_data_path)
     index = np.arange(0, image_list.shape[0])
     while True:
         np.random.shuffle(index)
