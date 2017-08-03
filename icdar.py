@@ -9,7 +9,6 @@ import scipy.optimize
 import matplotlib.pyplot as plt
 import matplotlib.patches as Patches
 from shapely.geometry import Polygon
-from keras.engine.training import GeneratorEnqueuer
 
 import tensorflow as tf
 
@@ -36,7 +35,8 @@ FLAGS = tf.app.flags.FLAGS
 def get_images():
     files = []
     for ext in ['jpg', 'png', 'jpeg', 'JPG']:
-        files.extend(glob.glob(FLAGS.training_data_path + '*.{}'.format(ext)))
+        files.extend(glob.glob(
+            os.path.join(FLAGS.training_data_path, '*.{}'.format(ext))))
     return files
 
 
@@ -50,10 +50,11 @@ def load_annoataion(p):
     text_tags = []
     if not os.path.exists(p):
         return np.array(text_polys, dtype=np.float32)
-    with open(p, 'rb') as f:
+    with open(p, 'r') as f:
         reader = csv.reader(f)
         for line in reader:
             label = line[-1]
+            line = [i.strip('\ufeff') for i in line]  # strip BOM
             x1, y1, x2, y2, x3, y3, x4, y4 = list(map(float, line[:8]))
             text_polys.append([[x1, y1], [x2, y2], [x3, y3], [x4, y4]])
             if label == '*' or label == '###':
@@ -119,8 +120,8 @@ def crop_area(im, polys, tags, crop_background=False, max_tries=50):
     :return:
     '''
     h, w, _ = im.shape
-    pad_h = h/10
-    pad_w = w/10
+    pad_h = h//10
+    pad_w = w//10
     h_array = np.zeros((h + pad_h*2), dtype=np.int32)
     w_array = np.zeros((w + pad_w*2), dtype=np.int32)
     for poly in polys:
@@ -581,7 +582,8 @@ def generator(input_size=512, batch_size=32,
               random_scale=np.array([0.5, 1, 2.0, 3.0]),
               vis=False):
     image_list = np.array(get_images())
-    print '{} training images in {}'.format(image_list.shape[0], FLAGS.training_data_path)
+    print('{} training images in {}'.format(
+        image_list.shape[0], FLAGS.training_data_path))
     index = np.arange(0, image_list.shape[0])
     while True:
         np.random.shuffle(index)
@@ -708,14 +710,17 @@ def generator(input_size=512, batch_size=32,
                     geo_maps = []
                     training_masks = []
             except Exception as e:
-                print(e)
+                import traceback
+                traceback.print_exc()
                 continue
 
 
 def get_batch(num_workers=10, **kwargs):
+    from keras.engine.training import GeneratorEnqueuer
     try:
-        enqueuer = GeneratorEnqueuer(generator(**kwargs), pickle_safe=True)
-        enqueuer.start(max_q_size=24, workers=num_workers)
+        enqueuer = GeneratorEnqueuer(generator(**kwargs),
+                                     use_multiprocessing=True)  # , pickle_safe=True)
+        enqueuer.start(max_queue_size=12, workers=num_workers)
         generator_output = None
         while True:
             while enqueuer.is_running():
