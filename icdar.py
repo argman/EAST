@@ -55,7 +55,9 @@ def load_annoataion(p):
         reader = csv.reader(f)
         for line in reader:
             label = line[-1]
-            line = [i.strip('\ufeff') for i in line]  # strip BOM
+            # strip BOM. \ufeff for python3,  \xef\xbb\bf for python2
+            line = [i.strip('\ufeff').strip('\xef\xbb\xbf') for i in line]
+
             x1, y1, x2, y2, x3, y3, x4, y4 = list(map(float, line[:8]))
             text_polys.append([[x1, y1], [x2, y2], [x3, y3], [x4, y4]])
             if label == '*' or label == '###':
@@ -189,25 +191,25 @@ def shrink_poly(poly, r):
                     np.linalg.norm(poly[0] - poly[3]) + np.linalg.norm(poly[1] - poly[2]):
         # first move (p0, p1), (p2, p3), then (p0, p3), (p1, p2)
         ## p0, p1
-        theta = np.arctan((poly[1][1] - poly[0][1]) / (poly[1][0] - poly[0][0]))
+        theta = np.arctan2((poly[1][1] - poly[0][1]), (poly[1][0] - poly[0][0]))
         poly[0][0] += R * r[0] * np.cos(theta)
         poly[0][1] += R * r[0] * np.sin(theta)
         poly[1][0] -= R * r[1] * np.cos(theta)
         poly[1][1] -= R * r[1] * np.sin(theta)
         ## p2, p3
-        theta = np.arctan((poly[2][1] - poly[3][1]) / (poly[2][0] - poly[3][0]))
+        theta = np.arctan2((poly[2][1] - poly[3][1]), (poly[2][0] - poly[3][0]))
         poly[3][0] += R * r[3] * np.cos(theta)
         poly[3][1] += R * r[3] * np.sin(theta)
         poly[2][0] -= R * r[2] * np.cos(theta)
         poly[2][1] -= R * r[2] * np.sin(theta)
         ## p0, p3
-        theta = np.arctan((poly[3][0] - poly[0][0]) / (poly[3][1] - poly[0][1]))
+        theta = np.arctan2((poly[3][0] - poly[0][0]), (poly[3][1] - poly[0][1]))
         poly[0][0] += R * r[0] * np.sin(theta)
         poly[0][1] += R * r[0] * np.cos(theta)
         poly[3][0] -= R * r[3] * np.sin(theta)
         poly[3][1] -= R * r[3] * np.cos(theta)
         ## p1, p2
-        theta = np.arctan((poly[2][0] - poly[1][0]) / (poly[2][1] - poly[1][1]))
+        theta = np.arctan2((poly[2][0] - poly[1][0]), (poly[2][1] - poly[1][1]))
         poly[1][0] += R * r[1] * np.sin(theta)
         poly[1][1] += R * r[1] * np.cos(theta)
         poly[2][0] -= R * r[2] * np.sin(theta)
@@ -215,25 +217,25 @@ def shrink_poly(poly, r):
     else:
         ## p0, p3
         # print poly
-        theta = np.arctan((poly[3][0] - poly[0][0]) / (poly[3][1] - poly[0][1]))
+        theta = np.arctan2((poly[3][0] - poly[0][0]), (poly[3][1] - poly[0][1]))
         poly[0][0] += R * r[0] * np.sin(theta)
         poly[0][1] += R * r[0] * np.cos(theta)
         poly[3][0] -= R * r[3] * np.sin(theta)
         poly[3][1] -= R * r[3] * np.cos(theta)
         ## p1, p2
-        theta = np.arctan((poly[2][0] - poly[1][0]) / (poly[2][1] - poly[1][1]))
+        theta = np.arctan2((poly[2][0] - poly[1][0]), (poly[2][1] - poly[1][1]))
         poly[1][0] += R * r[1] * np.sin(theta)
         poly[1][1] += R * r[1] * np.cos(theta)
         poly[2][0] -= R * r[2] * np.sin(theta)
         poly[2][1] -= R * r[2] * np.cos(theta)
         ## p0, p1
-        theta = np.arctan((poly[1][1] - poly[0][1]) / (poly[1][0] - poly[0][0]))
+        theta = np.arctan2((poly[1][1] - poly[0][1]), (poly[1][0] - poly[0][0]))
         poly[0][0] += R * r[0] * np.cos(theta)
         poly[0][1] += R * r[0] * np.sin(theta)
         poly[1][0] -= R * r[1] * np.cos(theta)
         poly[1][1] -= R * r[1] * np.sin(theta)
         ## p2, p3
-        theta = np.arctan((poly[2][1] - poly[3][1]) / (poly[2][0] - poly[3][0]))
+        theta = np.arctan2((poly[2][1] - poly[3][1]), (poly[2][0] - poly[3][0]))
         poly[3][0] += R * r[3] * np.cos(theta)
         poly[3][1] += R * r[3] * np.sin(theta)
         poly[2][0] -= R * r[2] * np.cos(theta)
