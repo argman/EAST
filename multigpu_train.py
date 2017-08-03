@@ -146,7 +146,7 @@ def main(argv=None):
 
         data_generator = icdar.get_batch(num_workers=FLAGS.num_readers,
                                          input_size=FLAGS.input_size,
-                                         batch_size=FLAGS.batch_size * len(gpus))
+                                         batch_size=FLAGS.batch_size_per_gpu * len(gpus))
 
         start = time.time()
         for step in range(FLAGS.max_steps):
@@ -161,7 +161,7 @@ def main(argv=None):
 
             if step % 10 == 0:
                 avg_time_per_step = (time.time() - start)/10
-                avg_examples_per_second = (10 * FLAGS.batch_size * len(gpus))/(time.time() - start)
+                avg_examples_per_second = (10 * FLAGS.batch_size_per_gpu * len(gpus))/(time.time() - start)
                 start = time.time()
                 print('Step {:06d}, model loss {:.4f}, total loss {:.4f}, {:.2f} seconds/step, {:.2f} examples/second'.format(
                     step, ml, tl, avg_time_per_step, avg_examples_per_second))
