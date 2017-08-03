@@ -26,12 +26,12 @@ If you want to train the model, you should provide the dataset path, in the data
 and run
 
 ```
-python multigpu_train.py --gpu_list=0 --input_size=512 --batch_size=14 --checkpoint_path=/tmp/east_icdar2015_resnet_v1_50_rbox/ \
+python multigpu_train.py --gpu_list=0 --input_size=512 --batch_size_per_gpu=14 --checkpoint_path=/tmp/east_icdar2015_resnet_v1_50_rbox/ \
 --text_scale=512 --training_data_path=/data/ocr/icdar2015/ --geometry=RBOX --learning_rate=0.0001 --num_readers=24 \
 --pretrained_model_path=/tmp/resnet_v1_50.ckpt
 ```
 
-If you have more than one gpu, you can pass gpu ids to gpu_list
+If you have more than one gpu, you can pass gpu ids to gpu_list(like --gpu_list=0,1,2,3)
 
 **Note: you should change the gt text file of icdar2015's filename to img_\*.txt instead of gt_img_\*.txt(or you can change the code in icdar.py), and some extra characters should be removed from the file.
 See the examples in training_samples/**

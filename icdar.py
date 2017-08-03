@@ -12,6 +12,7 @@ from shapely.geometry import Polygon
 
 import tensorflow as tf
 
+from data_util import GeneratorEnqueuer
 
 tf.app.flags.DEFINE_string('training_data_path', '/data/ocr/icdar2015/',
                            'training dataset to use')
@@ -715,17 +716,14 @@ def generator(input_size=512, batch_size=32,
                 continue
 
 
-def get_batch(num_workers=10, **kwargs):
-    from keras.engine.training import GeneratorEnqueuer
+def get_batch(num_workers, **kwargs):
     try:
-        enqueuer = GeneratorEnqueuer(generator(**kwargs),
-                                     use_multiprocessing=True)  # , pickle_safe=True)
-        enqueuer.start(max_queue_size=12, workers=num_workers)
+        enqueuer = GeneratorEnqueuer(generator(**kwargs), use_multiprocessing=True)
+        enqueuer.start(max_queue_size=24, workers=num_workers)
         generator_output = None
         while True:
             while enqueuer.is_running():
                 if not enqueuer.queue.empty():
-                    # print self.enqueuer.queue.qsize()
                     generator_output = enqueuer.queue.get()
                     break
                 else:
@@ -737,8 +735,6 @@ def get_batch(num_workers=10, **kwargs):
             enqueuer.stop()
 
 
+
 if __name__ == '__main__':
-    gen = generator(input_size=512, batch_size=32, vis=True)
-    while True:
-        images, image_fns, score_maps, geo_maps, training_masks = next(gen)
-        print(len(images))
+    pass

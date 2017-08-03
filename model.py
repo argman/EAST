@@ -129,8 +129,8 @@ def loss(y_true_cls, y_pred_cls,
     area_union = area_gt + area_pred - area_intersect
     L_AABB = -tf.log((area_intersect + 1.0)/(area_union + 1.0))
     L_theta = 1 - tf.cos(theta_pred - theta_gt)
-    tf.summary.scalar('geometry_AABB', tf.reduce_mean(L_AABB * y_true_cls))
-    tf.summary.scalar('geometry_theta', tf.reduce_mean(L_theta * y_true_cls))
+    tf.summary.scalar('geometry_AABB', tf.reduce_mean(L_AABB * y_true_cls * training_mask))
+    tf.summary.scalar('geometry_theta', tf.reduce_mean(L_theta * y_true_cls * training_mask))
     L_g = L_AABB + 20 * L_theta
 
     return tf.reduce_mean(L_g * y_true_cls * training_mask) + classification_loss
