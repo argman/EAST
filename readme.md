@@ -62,7 +62,7 @@ If you've downloaded the pre-trained model, you can setup a demo server by
 ```
 python3 run_demo_server.py --checkpoint-path /tmp/east_icdar2015_resnet_v1_50_rbox/
 ```
-The open http://localhost:8769 for the web demo. Notice that the URL will change after you submitted an image.
+Then open http://localhost:8769 for the web demo. Notice that the URL will change after you submitted an image.
 Something like `?r=49647854-7ac2-11e7-8bb7-80000210fe80` appends and that makes the URL persistent.
 As long as you are not deleting data in `static/results`, you can share your results to your friends using
 the same URL.
