@@ -102,3 +102,6 @@ ENV/
 
 # vim swapfile
 *.swp
+
+# result files for demo
+static/results

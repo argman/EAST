@@ -1,0 +1,143 @@
+<!doctype! html>
+<html>
+	<head>
+		<title>EAST Text Detection Demo</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" type="text/css">
+		<link rel="stylesheet" href="/static/css/app.css" type="text/css">
+
+		<script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+		<script src="https://cdn.staticfile.org/tether/1.4.0/js/tether.min.js"></script>
+		<script src="https://cdn.staticfile.org/twitter-bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
+		<script src="https://unpkg.com/vue"></script>
+	</head>
+	<body>
+		<div id="app">
+			<div>
+				<form id="upload-form" method="post" enctype="multipart/form-data">
+					<h5>EAST Text Detection Demo</h5>
+					<div class="form-content-container">
+						<input id="upload_images" type="file" name="image" />
+						<input id="upload_button" type="submit" value="Submit" />
+					</div>
+				</form>
+			</div>
+			<hr>
+			<div id="result">
+<!--                <div class="item">-->
+<!--                    <div>Input image</div>-->
+<!--                    <img :src="input_image_url">-->
+<!--                </div>-->
+				<div class="item">
+					<div>Result</div>
+					<ul>
+						<li>
+							<img id="result-image" :src="result_image_url">
+						</li>
+					</ul>
+				</div>
+				<div class="item">
+					<div>Runtime parameters</div>
+					<div>
+						<ul>
+							<li v-for="(val, key) in rtparams">
+							{% raw %}{{ key }}: {{ val }}{% endraw %}
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="item">
+					<div>Timing</div>
+					<div>
+						<ul>
+							<li v-for="(val, key) in timing">
+							{% raw %}{{ key }}: {{ val }}{% endraw %}
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="item">
+					<div>Text Lines</div>
+					<div>
+						<ul>
+							<li> {% raw %}{{ text_lines.length }}{% endraw %} text lines </li>
+							<li v-for="tl in text_lines">
+							{% raw %}{{ tl }}{% endraw %}
+							</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="item">
+					<div>JSON</div>
+					<ul>
+						<li>
+						<a :href="result_json_url">{% raw %}{{ result_json_url }}{% endraw %}</a>
+						</li>
+					</ul>
+				</div>
+
+			</div>
+		</div>
+
+		<script>
+			$(function() {
+				function getQueryStrings() {
+					var vars = [], hash, hashes;
+					if (window.location.href.indexOf('#') === -1) {
+						hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+					} else {
+						hashes = window.location.href.slice(window.location.href.indexOf('?') + 1, window.location.href.indexOf('#')).split('&');
+					}
+					for(var i = 0; i < hashes.length; i++) {
+						hash = hashes[i].split('=');
+						vars.push(hash[0]);
+						vars[hash[0]] = hash[1];
+					}
+					return vars;
+				}
+
+				var session_id = '{{session_id}}';
+
+				var app = new Vue({
+					el: '#app',
+					data: {
+						session_id: session_id,
+						text_lines: [],
+						rtparams: {},
+						timing: {},
+					},
+					computed: {
+						input_image_url: function() { return '/static/results/' + this.session_id + '/input.png'; },
+						result_image_url: function() { return '/static/results/' + this.session_id + '/output.png'; },
+						result_json_url: function() { return '/static/results/' + this.session_id + '/result.json'; },
+					},
+				});
+
+				var render = function(session_id) {
+					app.session_id = session_id;
+					app.text_lines = ['loading'];
+					$.get('/static/results/' + session_id + '/result.json', function(data) {
+						app.text_lines = data.text_lines;
+						app.rtparams = data.rtparams;
+						app.timing = data.timing;
+					});
+				}
+
+				if (session_id != 'dummy_session_id') {
+					window.history.pushState({},"", '/?r=' + session_id);
+					render(session_id);
+				} else {
+					var queryStrings = getQueryStrings();
+					var rid = queryStrings['r'];
+					if (rid) {
+						render(rid);
+					}
+				}
+
+			})
+
+		</script>
+
+	</body>
+</html>

@@ -30,6 +30,7 @@ Please site his [paper](https://arxiv.org/abs/1704.03155v2) if you find this use
 ### Contents
 1. [Installation](#installation)
 2. [Download](#download)
+2. [Demo](#demo)
 3. [Test](#train)
 4. [Train](#test)
 5. [Examples](#examples)
@@ -55,6 +56,19 @@ If you have more than one gpu, you can pass gpu ids to gpu_list(like --gpu_list=
 
 **Note: you should change the gt text file of icdar2015's filename to img_\*.txt instead of gt_img_\*.txt(or you can change the code in icdar.py), and some extra characters should be removed from the file.
 See the examples in training_samples/**
+
+### Demo
+If you've downloaded the pre-trained model, you can setup a demo server by
+```
+python3 run_demo_server.py --checkpoint-path /tmp/east_icdar2015_resnet_v1_50_rbox/
+```
+The open http://localhost:8769 for the web demo. Notice that the URL will change after you submitted an image.
+Something like `?r=49647854-7ac2-11e7-8bb7-80000210fe80` appends and that makes the URL persistent.
+As long as you are not deleting data in `static/results`, you can share your results to your friends using
+the same URL.
+
+![web-demo](demo_images/web-demo.png)
+
 
 ### Test
 run
