@@ -15,9 +15,9 @@ The features are summarized blow:
 + Speed on 720p (resolution of 1280x720) images:
 	+ Now
 		+ Graphic card: GTX 1080 Ti
-		+ Network fprop: ~50 ms
-		+ NMS (C++): ~6ms
-		+ Overall: ~16 fps
+		+ Network fprop: **~50 ms**
+		+ NMS (C++): **~6ms**
+		+ Overall: **~16 fps**
 	+ Then
 		+ Graphic card: K40
 		+ Network fprop: ~150 ms
