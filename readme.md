@@ -6,7 +6,7 @@ The features are summarized blow:
 + Only **RBOX** part is implemented.
 + A fast Locality-Aware NMS in C++ provided by the paper's author.
 + The pre-trained model provided achieves **80.83** F1-score on ICDAR 2015
-	Incidental Scene Text Detection using only images from ICDAR 2015 and 2013.
+	Incidental Scene Text Detection Challenge using only training images from ICDAR 2015 and 2013.
   see [here](http://rrc.cvc.uab.es/?ch=4&com=evaluation&view=method_samples&task=1&m=29855&gtv=1) for the detailed results.
 + Differences from original paper
 	+ Use ResNet-50 rather than PVANET
