@@ -69,6 +69,26 @@
 				</div>
 
 				<div class="item">
+					<div>Host Info</div>
+					<div>
+						<ul>
+							<li>
+							<details>
+								<summary>/proc/cpuinfo</summary>
+								<pre>{% raw %}{{ cpuinfo }}{% endraw %}</pre>
+							</details>
+							</li>
+							<li>
+							<details>
+								<summary>/proc/meminfo</summary>
+								<pre>{% raw %}{{ meminfo }}{% endraw %}</pre>
+							</details>
+							</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="item">
 					<div>JSON</div>
 					<ul>
 						<li>
@@ -87,7 +107,6 @@
 		</div>
 
 		<script>
-			var APP;
 			$(function() {
 				function getQueryStrings() {
 					var vars = [], hash, hashes;
@@ -131,6 +150,8 @@
 						app.text_lines = data.text_lines;
 						app.rtparams = data.rtparams;
 						app.timing = data.timing;
+						app.cpuinfo = data.cpuinfo
+						app.meminfo = data.meminfo
 					});
 				}
 

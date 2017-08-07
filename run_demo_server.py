@@ -17,6 +17,18 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
+@functools.lru_cache(maxsize=1)
+def get_host_info():
+    ret = {}
+    with open('/proc/cpuinfo') as f:
+        ret['cpuinfo'] = f.read()
+
+    with open('/proc/meminfo') as f:
+        ret['meminfo'] = f.read()
+
+    return ret
+
+
 @functools.lru_cache(maxsize=100)
 def get_predictor(checkpoint_path):
     logger.info('loading model')
@@ -110,12 +122,13 @@ def get_predictor(checkpoint_path):
                     map(float, box.flatten())))
                 tl['score'] = float(score)
                 text_lines.append(tl)
-
-        return {
+        ret = {
             'text_lines': text_lines,
             'rtparams': rtparams,
             'timing': timer,
         }
+        ret.update(get_host_info())
+        return ret
 
 
     return predictor
