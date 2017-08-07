@@ -3,6 +3,9 @@
 ### Introduction
 This is a tensorflow re-implementation of [EAST: An Efficient and Accurate Scene Text Detector](https://arxiv.org/abs/1704.03155v2).
 The features are summarized blow:
++ Online demo
+	+ http://east.zxytim.com/
+	+ Result example: http://east.zxytim.com/?r=48e5020a-7b7f-11e7-b776-f23c91e0703e
 + Only **RBOX** part is implemented.
 + A fast Locality-Aware NMS in C++ provided by the paper's author.
 + The pre-trained model provided achieves **80.83** F1-score on ICDAR 2015
@@ -67,6 +70,7 @@ Something like `?r=49647854-7ac2-11e7-8bb7-80000210fe80` appends and that makes 
 As long as you are not deleting data in `static/results`, you can share your results to your friends using
 the same URL.
 
+URL for example below: http://east.zxytim.com/?r=48e5020a-7b7f-11e7-b776-f23c91e0703e
 ![web-demo](demo_images/web-demo.png)
 
 
