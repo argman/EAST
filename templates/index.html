@@ -83,6 +83,12 @@
 								<summary>/proc/meminfo</summary>
 								<pre>{% raw %}{{ meminfo }}{% endraw %}</pre>
 							</details>
+							<li>
+							<details>
+								<summary>/proc/loadavg</summary>
+								<pre>{% raw %}{{ loadavg }}{% endraw %}</pre>
+							</details>
+							</li>
 							</li>
 						</ul>
 					</div>
@@ -132,6 +138,9 @@
 						text_lines: [],
 						rtparams: {},
 						timing: {},
+						cpuinfo: '',
+						meminfo: '',
+						loadavg: '',
 					},
 					computed: {
 						input_image_url: function() { return '/static/results/' + this.session_id + '/input.png'; },
@@ -152,6 +161,7 @@
 						app.timing = data.timing;
 						app.cpuinfo = data.cpuinfo
 						app.meminfo = data.meminfo
+						app.loadavg = data.loadavg
 					});
 				}
 

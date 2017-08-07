@@ -26,6 +26,9 @@ def get_host_info():
     with open('/proc/meminfo') as f:
         ret['meminfo'] = f.read()
 
+    with open('/proc/loadavg') as f:
+        ret['loadavg'] = f.read()
+
     return ret
 
 
@@ -74,6 +77,9 @@ def get_predictor(checkpoint_path):
                 'net': ,
                 'restore': ,
                 'nms': ,
+                'cpuinfo': ,
+                'meminfo': ,
+                'uptime': ,
             }
         }
         """
