@@ -81,6 +81,7 @@
 		</div>
 
 		<script>
+			var APP;
 			$(function() {
 				function getQueryStrings() {
 					var vars = [], hash, hashes;
@@ -118,6 +119,7 @@
 					app.session_id = session_id;
 					app.text_lines = ['loading'];
 					$.get('/static/results/' + session_id + '/result.json', function(data) {
+						data = JSON.parse(data);
 						app.text_lines = data.text_lines;
 						app.rtparams = data.rtparams;
 						app.timing = data.timing;
