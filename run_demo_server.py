@@ -171,7 +171,8 @@ def save_result(img, rst):
     return rst
 
 
-args = None
+
+checkpoint_path = './east_icdar2015_resnet_v1_50_rbox'
 
 
 @app.route('/', methods=['POST'])
@@ -181,20 +182,20 @@ def index_post():
     bio = io.BytesIO()
     request.files['image'].save(bio)
     img = cv2.imdecode(np.frombuffer(bio.getvalue(), dtype='uint8'), 1)
-    rst = get_predictor(args.checkpoint_path)(img)
+    rst = get_predictor(checkpoint_path)(img)
 
     save_result(img, rst)
     return render_template('index.html', session_id=rst['session_id'])
 
 
 def main():
-    global args
+    global checkpoint_path
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', default=8769, type=int)
-    parser.add_argument('--checkpoint-path',
-                        default='./east_icdar2015_resnet_v1_50_rbox')
+    parser.add_argument('--checkpoint-path', default=checkpoint_path)
     parser.add_argument('--debug', action='store_true')
     args = parser.parse_args()
+    checkpoint_path = args.checkpoint_path
 
     if not os.path.exists(args.checkpoint_path):
         raise RuntimeError(
