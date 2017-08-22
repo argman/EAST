@@ -29,7 +29,7 @@ The features are summarized blow:
 		+ Overall: ~2 fps
 
 Thanks for the author's ([@zxytim](https://github.com/zxytim)) help!
-Please site his [paper](https://arxiv.org/abs/1704.03155v2) if you find this useful.
+Please cite his [paper](https://arxiv.org/abs/1704.03155v2) if you find this useful.
 
 ### Contents
 1. [Installation](#installation)
