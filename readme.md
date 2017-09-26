@@ -78,8 +78,11 @@ URL for example below: http://east.zxytim.com/?r=48e5020a-7b7f-11e7-b776-f23c91e
 ### Test
 run
 ```
-python eval.py --test_data_path=/tmp/images/ --gpu_list=0 --checkpoint_path=/tmp/east_icdar2015_resnet_v1_50_rbox/ \
---output_path=/tmp/
+python eval.py \
+	--test_data_path=/tmp/images/ \
+	--gpu_list=0 \
+	--checkpoint_path=/tmp/east_icdar2015_resnet_v1_50_rbox/ \
+	--output_dir=/tmp/
 ```
 
 a text file will be then written to the output path.
