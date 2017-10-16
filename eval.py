@@ -5,8 +5,9 @@ import os
 import numpy as np
 import tensorflow as tf
 
+import nms
 import locality_aware_nms as nms_locality
-import lanms
+# import lanms
 
 tf.app.flags.DEFINE_string('test_data_path', '/tmp/ch4_test_images/images/', '')
 tf.app.flags.DEFINE_string('gpu_list', '0', '')
@@ -66,7 +67,7 @@ def resize_image(im, max_side_len=2400):
     return im, (ratio_h, ratio_w)
 
 
-def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_thres=0.2):
+def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_thres=.2):
     '''
     restore text boxes from score map and geo map
     :param score_map:
@@ -95,7 +96,7 @@ def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_
     # nms part
     start = time.time()
     # boxes = nms_locality.nms_locality(boxes.astype(np.float64), nms_thres)
-    boxes = lanms.merge_quadrangle_n9(boxes.astype('float32'), nms_thres)
+    # boxes = lanms.merge_quadrangle_n9(boxes.astype('float32'), nms_thres) # JOSH COMMENTED OUT
     timer['nms'] = time.time() - start
 
     if boxes.shape[0] == 0:
@@ -141,13 +142,19 @@ def main(argv=None):
         saver = tf.train.Saver(variable_averages.variables_to_restore())
 
         with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+
             ckpt_state = tf.train.get_checkpoint_state(FLAGS.checkpoint_path)
             model_path = os.path.join(FLAGS.checkpoint_path, os.path.basename(ckpt_state.model_checkpoint_path))
+            '''
+            ckpt_state = tf.train.get_checkpoint_state('~/Documents/block_six/EAST/tmp/')
+            model_path = os.path.join('~/Documents/block_six/EAST/tmp/', os.path.basename('~/Documents/block_six/EAST/tmp/resnet_v1_50.ckpt'))
+            '''
             print('Restore from {}'.format(model_path))
             saver.restore(sess, model_path)
 
             im_fn_list = get_images()
-            for im_fn in im_fn_list:
+
+            for iq, im_fn in enumerate(im_fn_list):
                 im = cv2.imread(im_fn)[:, :, ::-1]
                 start_time = time.time()
                 im_resized, (ratio_h, ratio_w) = resize_image(im)
@@ -171,11 +178,37 @@ def main(argv=None):
 
                 # save to file
                 if boxes is not None:
+
                     res_file = os.path.join(
                         FLAGS.output_dir,
                         '{}.txt'.format(
                             os.path.basename(im_fn).split('.')[0]))
+                    # print(len(boxes))
+                    all_boxes = []
+                    for box in boxes:
+                        x_min = min(box[:, 0])
+                        x_max = max(box[:, 0])
+                        y_min = min(box[:, 1])
+                        y_max = max(box[:, 1])
 
+                        all_boxes.append([x_min, y_min, x_max, y_max])
+
+                    all_boxes = nms.nms(all_boxes)
+                    # print(len(all_boxes))
+                    # print('all_boxes:', all_boxes)
+
+                    im = cv2.imread(im_fn)
+                    for ix, box in enumerate(all_boxes):
+                        box = [int(x) if int(x) % 2 == 0 else (int(x) + 1) for x in box]
+                        new_arr = im[box[1]:box[3], box[0]:box[2], :]
+                        # im = cv2.rectangle(im, (box[0], box[1]), (box[2], box[3]), (0, 0, 255), 3)
+                        # cv2.imwrite('tmp/draws/test_{}.jpg'.format(iq), im)
+
+                        # cv2.imwrite('tmp/images/test_{}_{}.jpg'.format(ix, iq), new_arr)
+                        # print('ix: {}, iq: {}'.format(ix, iq))
+                        cv2.imwrite('/poet_2/out_crops/test_{}_{}.jpg'.format(iq, ix), new_arr)
+
+                    print("Image {} with {} crops.".format(iq, len(all_boxes)))
                     with open(res_file, 'w') as f:
                         for box in boxes:
                             # to avoid submitting errors
@@ -185,10 +218,13 @@ def main(argv=None):
                             f.write('{},{},{},{},{},{},{},{}\r\n'.format(
                                 box[0, 0], box[0, 1], box[1, 0], box[1, 1], box[2, 0], box[2, 1], box[3, 0], box[3, 1],
                             ))
-                            cv2.polylines(im[:, :, ::-1], [box.astype(np.int32).reshape((-1, 1, 2))], True, color=(255, 255, 0), thickness=1)
+                            # cv2.polylines(im[:, :, ::-1], [box.astype(np.int32).reshape((-1, 1, 2))], True, color=(255, 255, 0), thickness=1)
+
+                '''
                 if not FLAGS.no_write_images:
                     img_path = os.path.join(FLAGS.output_dir, os.path.basename(im_fn))
                     cv2.imwrite(img_path, im[:, :, ::-1])
+                '''
 
 if __name__ == '__main__':
     tf.app.run()
