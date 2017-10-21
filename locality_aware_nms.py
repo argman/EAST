@@ -12,11 +12,11 @@ def intersection(g, p):
     if union == 0:
         return 0
     else:
-        return inter/union
+        return inter / union
 
 
 def weighted_merge(g, p):
-    g[:8] = (g[8] * g[:8] + p[8] * p[:8])/(g[8] + p[8])
+    g[:8] = (g[8] * g[:8] + p[8] * p[:8]) / (g[8] + p[8])
     g[8] = (g[8] + p[8])
     return g
 
@@ -28,9 +28,9 @@ def standard_nms(S, thres):
         i = order[0]
         keep.append(i)
         ovr = np.array([intersection(S[i], S[t]) for t in order[1:]])
-
+        # 只保留Iou小于阈值的框(大于0.1认为是同一个目标的重合框)
         inds = np.where(ovr <= thres)[0]
-        order = order[inds+1]
+        order = order[inds + 1]
 
     return S[keep]
 

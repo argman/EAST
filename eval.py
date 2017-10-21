@@ -1,3 +1,4 @@
+# encoding: utf-8
 import cv2
 import time
 import math
@@ -13,11 +14,13 @@ tf.app.flags.DEFINE_string('gpu_list', '0', '')
 tf.app.flags.DEFINE_string('checkpoint_path', '/tmp/east_icdar2015_resnet_v1_50_rbox/', '')
 tf.app.flags.DEFINE_string('output_dir', '/tmp/ch4_test_images/images/', '')
 tf.app.flags.DEFINE_bool('no_write_images', False, 'do not write images')
+tf.app.flags.DEFINE_string('result_suffix', time.strftime('_%Y%m%d_%H%M%S'), 'Result file suffix')
 
 import model
 from icdar import restore_rectangle
 
 FLAGS = tf.app.flags.FLAGS
+
 
 def get_images():
     '''
@@ -50,7 +53,8 @@ def resize_image(im, max_side_len=2400):
 
     # limit the max side
     if max(resize_h, resize_w) > max_side_len:
-        ratio = float(max_side_len) / resize_h if resize_h > resize_w else float(max_side_len) / resize_w
+        ratio = float(max_side_len) / \
+            resize_h if resize_h > resize_w else float(max_side_len) / resize_w
     else:
         ratio = 1.
     resize_h = int(resize_h * ratio)
@@ -66,14 +70,15 @@ def resize_image(im, max_side_len=2400):
     return im, (ratio_h, ratio_w)
 
 
-def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_thres=0.2):
+# 源代码中nms等于0.2
+def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_thres=0.203):
     '''
     restore text boxes from score map and geo map
     :param score_map:
     :param geo_map:
     :param timer:
     :param score_map_thresh: threshhold for score map
-    :param box_thresh: threshhold for boxes
+    :param box_thresh: threshhold for boxes(得分)
     :param nms_thres: threshold for nms
     :return:
     '''
@@ -86,7 +91,8 @@ def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_
     xy_text = xy_text[np.argsort(xy_text[:, 0])]
     # restore
     start = time.time()
-    text_box_restored = restore_rectangle(xy_text[:, ::-1]*4, geo_map[xy_text[:, 0], xy_text[:, 1], :]) # N*4*2
+    text_box_restored = restore_rectangle(
+        xy_text[:, ::-1] * 4, geo_map[xy_text[:, 0], xy_text[:, 1], :])  # N*4*2
     print('{} text boxes before nms'.format(text_box_restored.shape[0]))
     boxes = np.zeros((text_box_restored.shape[0], 9), dtype=np.float32)
     boxes[:, :8] = text_box_restored.reshape((-1, 8))
@@ -113,7 +119,7 @@ def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_
 
 def sort_poly(p):
     min_axis = np.argmin(np.sum(p, axis=1))
-    p = p[[min_axis, (min_axis+1)%4, (min_axis+2)%4, (min_axis+3)%4]]
+    p = p[[min_axis, (min_axis + 1) % 4, (min_axis + 2) % 4, (min_axis + 3) % 4]]
     if abs(p[0, 0] - p[1, 0]) > abs(p[0, 1] - p[1, 1]):
         return p
     else:
@@ -124,7 +130,6 @@ def main(argv=None):
     import os
     os.environ['CUDA_VISIBLE_DEVICES'] = FLAGS.gpu_list
 
-
     try:
         os.makedirs(FLAGS.output_dir)
     except OSError as e:
@@ -133,7 +138,8 @@ def main(argv=None):
 
     with tf.get_default_graph().as_default():
         input_images = tf.placeholder(tf.float32, shape=[None, None, None, 3], name='input_images')
-        global_step = tf.get_variable('global_step', [], initializer=tf.constant_initializer(0), trainable=False)
+        global_step = tf.get_variable(
+            'global_step', [], initializer=tf.constant_initializer(0), trainable=False)
 
         f_score, f_geometry = model.model(input_images, is_training=False)
 
@@ -142,7 +148,8 @@ def main(argv=None):
 
         with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
             ckpt_state = tf.train.get_checkpoint_state(FLAGS.checkpoint_path)
-            model_path = os.path.join(FLAGS.checkpoint_path, os.path.basename(ckpt_state.model_checkpoint_path))
+            model_path = os.path.join(FLAGS.checkpoint_path, os.path.basename(
+                ckpt_state.model_checkpoint_path))
             print('Restore from {}'.format(model_path))
             saver.restore(sess, model_path)
 
@@ -154,12 +161,13 @@ def main(argv=None):
 
                 timer = {'net': 0, 'restore': 0, 'nms': 0}
                 start = time.time()
-                score, geometry = sess.run([f_score, f_geometry], feed_dict={input_images: [im_resized]})
+                score, geometry = sess.run([f_score, f_geometry], feed_dict={
+                                           input_images: [im_resized]})
                 timer['net'] = time.time() - start
 
                 boxes, timer = detect(score_map=score, geo_map=geometry, timer=timer)
                 print('{} : net {:.0f}ms, restore {:.0f}ms, nms {:.0f}ms'.format(
-                    im_fn, timer['net']*1000, timer['restore']*1000, timer['nms']*1000))
+                    im_fn, timer['net'] * 1000, timer['restore'] * 1000, timer['nms'] * 1000))
 
                 if boxes is not None:
                     boxes = boxes[:, :8].reshape((-1, 4, 2))
@@ -173,22 +181,34 @@ def main(argv=None):
                 if boxes is not None:
                     res_file = os.path.join(
                         FLAGS.output_dir,
-                        '{}.txt'.format(
+                        'res_{}.txt'.format(
                             os.path.basename(im_fn).split('.')[0]))
 
                     with open(res_file, 'w') as f:
                         for box in boxes:
                             # to avoid submitting errors
                             box = sort_poly(box.astype(np.int32))
-                            if np.linalg.norm(box[0] - box[1]) < 5 or np.linalg.norm(box[3]-box[0]) < 5:
+                            if np.linalg.norm(box[0] - box[1]) < 5 or np.linalg.norm(box[3] - box[0]) < 5:
                                 continue
                             f.write('{},{},{},{},{},{},{},{}\r\n'.format(
-                                box[0, 0], box[0, 1], box[1, 0], box[1, 1], box[2, 0], box[2, 1], box[3, 0], box[3, 1],
+                                box[0, 0], box[0, 1], box[1, 0], box[1, 1], box[2,
+                                                                                0], box[2, 1], box[3, 0], box[3, 1],
                             ))
-                            cv2.polylines(im[:, :, ::-1], [box.astype(np.int32).reshape((-1, 1, 2))], True, color=(255, 255, 0), thickness=1)
-                if not FLAGS.no_write_images:
+                            cv2.polylines(
+                                im[:, :, ::-1], [box.astype(np.int32).reshape((-1, 1, 2))], True, color=(255, 255, 0), thickness=1)
+
+                if FLAGS.no_write_images:
                     img_path = os.path.join(FLAGS.output_dir, os.path.basename(im_fn))
                     cv2.imwrite(img_path, im[:, :, ::-1])
+
+             # compress results into a single zip file
+            result_dir_name = 'results' + FLAGS.result_suffix
+            print "zip as: " + result_dir_name
+            cmd = "zip -rj {}.zip {}".format(os.path.join(FLAGS.output_dir, '../submit', result_dir_name),
+                                             FLAGS.output_dir)
+            print('Executing {}'.format(cmd))
+            os.system(cmd)
+
 
 if __name__ == '__main__':
     tf.app.run()
