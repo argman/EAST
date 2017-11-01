@@ -1,5 +1,5 @@
-CXXFLAGS = -I include  -std=c++11 -O3 $(shell python3-config --cflags)
-LDFLAGS = $(shell python3-config --ldflags)
+CXXFLAGS = -I include  -std=c++11 -O3 $(shell python2-config --cflags)
+LDFLAGS = $(shell python2-config --ldflags)
 
 DEPS = lanms.h $(shell find include -xtype f)
 CXX_SOURCES = adaptor.cpp include/clipper/clipper.cpp

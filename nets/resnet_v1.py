@@ -106,6 +106,9 @@ def bottleneck(inputs, depth, depth_bottleneck, stride, rate=1,
 
         output = tf.nn.relu(shortcut + residual)
 
+        # new loss
+        # x = shortcut + residual
+        # output = x * tf.nn.sigmoid(x)
         return slim.utils.collect_named_outputs(outputs_collections,
                                                 sc.original_name_scope,
                                                 output)

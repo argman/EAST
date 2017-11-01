@@ -1,0 +1,11 @@
+python multigpu_train.py --gpu_list=0 \
+--input_size=512 \
+--batch_size_per_gpu=6 \
+--restore=true \
+--checkpoint_path=./model/ckpt_dice_Coefficient_version/ \
+--text_scale=512 \
+--training_data_path=/home/neo/Dataset/ICDAR2015/TextLocalization/ch4_training_images \
+--geometry=RBOX \
+--learning_rate=0.0001 \
+--num_readers=2 \
+# --pretrained_model_path=./model/resnet_v1_50.ckpt

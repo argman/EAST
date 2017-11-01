@@ -1,13 +1,15 @@
+# encoding: utf-8
 import time
+import os
 import numpy as np
 import tensorflow as tf
 from tensorflow.contrib import slim
 
 tf.app.flags.DEFINE_integer('input_size', 512, '')
 tf.app.flags.DEFINE_integer('batch_size_per_gpu', 14, '')
-tf.app.flags.DEFINE_integer('num_readers', 16, '')
+tf.app.flags.DEFINE_integer('num_readers', 2, '')
 tf.app.flags.DEFINE_float('learning_rate', 0.0001, '')
-tf.app.flags.DEFINE_integer('max_steps', 100000, '')
+tf.app.flags.DEFINE_integer('max_steps', 600000, '')
 tf.app.flags.DEFINE_float('moving_average_decay', 0.997, '')
 tf.app.flags.DEFINE_string('gpu_list', '1', '')
 tf.app.flags.DEFINE_string('checkpoint_path', '/tmp/east_resnet_v1_50_rbox/', '')
@@ -77,20 +79,25 @@ def main(argv=None):
             tf.gfile.MkDir(FLAGS.checkpoint_path)
 
     input_images = tf.placeholder(tf.float32, shape=[None, None, None, 3], name='input_images')
-    input_score_maps = tf.placeholder(tf.float32, shape=[None, None, None, 1], name='input_score_maps')
+    input_score_maps = tf.placeholder(
+        tf.float32, shape=[None, None, None, 1], name='input_score_maps')
     if FLAGS.geometry == 'RBOX':
-        input_geo_maps = tf.placeholder(tf.float32, shape=[None, None, None, 5], name='input_geo_maps')
+        input_geo_maps = tf.placeholder(
+            tf.float32, shape=[None, None, None, 5], name='input_geo_maps')
     else:
-        input_geo_maps = tf.placeholder(tf.float32, shape=[None, None, None, 8], name='input_geo_maps')
-    input_training_masks = tf.placeholder(tf.float32, shape=[None, None, None, 1], name='input_training_masks')
+        input_geo_maps = tf.placeholder(
+            tf.float32, shape=[None, None, None, 8], name='input_geo_maps')
+    input_training_masks = tf.placeholder(
+        tf.float32, shape=[None, None, None, 1], name='input_training_masks')
 
-    global_step = tf.get_variable('global_step', [], initializer=tf.constant_initializer(0), trainable=False)
-    learning_rate = tf.train.exponential_decay(FLAGS.learning_rate, global_step, decay_steps=10000, decay_rate=0.94, staircase=True)
+    global_step = tf.get_variable(
+        'global_step', [], initializer=tf.constant_initializer(0), trainable=False)
+    learning_rate = tf.train.exponential_decay(
+        FLAGS.learning_rate, global_step, decay_steps=10000, decay_rate=0.94, staircase=True)
     # add summary
     tf.summary.scalar('learning_rate', learning_rate)
     opt = tf.train.AdamOptimizer(learning_rate)
     # opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
-
 
     # split
     input_images_split = tf.split(input_images, len(gpus))
@@ -137,6 +144,7 @@ def main(argv=None):
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         if FLAGS.restore:
             print('continue training from previous checkpoint')
+            print(FLAGS.checkpoint_path)
             ckpt = tf.train.latest_checkpoint(FLAGS.checkpoint_path)
             saver.restore(sess, ckpt)
         else:
@@ -151,6 +159,7 @@ def main(argv=None):
         start = time.time()
         for step in range(FLAGS.max_steps):
             data = next(data_generator)
+            # model loss, total loss
             ml, tl, _ = sess.run([model_loss, total_loss, train_op], feed_dict={input_images: data[0],
                                                                                 input_score_maps: data[2],
                                                                                 input_geo_maps: data[3],
@@ -160,14 +169,16 @@ def main(argv=None):
                 break
 
             if step % 10 == 0:
-                avg_time_per_step = (time.time() - start)/10
-                avg_examples_per_second = (10 * FLAGS.batch_size_per_gpu * len(gpus))/(time.time() - start)
+                avg_time_per_step = (time.time() - start) / 10
+                avg_examples_per_second = (10 * FLAGS.batch_size_per_gpu *
+                                           len(gpus)) / (time.time() - start)
                 start = time.time()
                 print('Step {:06d}, model loss {:.4f}, total loss {:.4f}, {:.2f} seconds/step, {:.2f} examples/second'.format(
                     step, ml, tl, avg_time_per_step, avg_examples_per_second))
 
             if step % FLAGS.save_checkpoint_steps == 0:
-                saver.save(sess, FLAGS.checkpoint_path + 'model.ckpt', global_step=global_step)
+                saver.save(sess, os.path.join(FLAGS.checkpoint_path,
+                                              'model.ckpt'), global_step=global_step)
 
             if step % FLAGS.save_summary_steps == 0:
                 _, tl, summary_str = sess.run([train_op, total_loss, summary_op], feed_dict={input_images: data[0],
@@ -175,6 +186,7 @@ def main(argv=None):
                                                                                              input_geo_maps: data[3],
                                                                                              input_training_masks: data[4]})
                 summary_writer.add_summary(summary_str, global_step=step)
+
 
 if __name__ == '__main__':
     tf.app.run()

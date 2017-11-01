@@ -1,4 +1,3 @@
-# encoding: utf-8
 import cv2
 import time
 import math
@@ -70,7 +69,6 @@ def resize_image(im, max_side_len=2400):
     return im, (ratio_h, ratio_w)
 
 
-# 源代码中nms等于0.2
 def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_thres=0.2):
     '''
     restore text boxes from score map and geo map
@@ -78,7 +76,7 @@ def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_
     :param geo_map:
     :param timer:
     :param score_map_thresh: threshhold for score map
-    :param box_thresh: threshhold for boxes(得分)
+    :param box_thresh: threshhold for boxes
     :param nms_thres: threshold for nms
     :return:
     '''
@@ -165,6 +163,7 @@ def main(argv=None):
                                            input_images: [im_resized]})
                 timer['net'] = time.time() - start
 
+                # boxes: contains 4*2 coord value + 1 threshold
                 boxes, timer = detect(score_map=score, geo_map=geometry, timer=timer)
                 print('{} : net {:.0f}ms, restore {:.0f}ms, nms {:.0f}ms'.format(
                     im_fn, timer['net'] * 1000, timer['restore'] * 1000, timer['nms'] * 1000))
@@ -173,6 +172,8 @@ def main(argv=None):
                     boxes = boxes[:, :8].reshape((-1, 4, 2))
                     boxes[:, :, 0] /= ratio_w
                     boxes[:, :, 1] /= ratio_h
+                    # print boxes
+                    # raw_input()
 
                 duration = time.time() - start_time
                 print('[timing] {}'.format(duration))
@@ -190,9 +191,8 @@ def main(argv=None):
                             box = sort_poly(box.astype(np.int32))
                             if np.linalg.norm(box[0] - box[1]) < 5 or np.linalg.norm(box[3] - box[0]) < 5:
                                 continue
-                            f.write('{},{},{},{},{},{},{},{}\r\n'.format(
-                                box[0, 0], box[0, 1], box[1, 0], box[1, 1], box[2,
-                                                                                0], box[2, 1], box[3, 0], box[3, 1],
+                            f.write('{},{},{},{}\r\n'.format(
+                                box[0, 0], box[0, 1], box[2, 0], box[2, 1],
                             ))
                             cv2.polylines(
                                 im[:, :, ::-1], [box.astype(np.int32).reshape((-1, 1, 2))], True, color=(255, 255, 0), thickness=1)
@@ -202,9 +202,9 @@ def main(argv=None):
                     cv2.imwrite(img_path, im[:, :, ::-1])
 
              # compress results into a single zip file
-            result_dir_name = 'results' + FLAGS.result_suffix
+            result_dir_name = 'results_icdar13' + FLAGS.result_suffix
             print "zip as: " + result_dir_name
-            cmd = "zip -rj {}.zip {}".format(os.path.join(FLAGS.output_dir, '../submit', result_dir_name),
+            cmd = "zip -rj {}.zip {}".format(os.path.join(FLAGS.output_dir, '../submit13', result_dir_name),
                                              FLAGS.output_dir)
             print('Executing {}'.format(cmd))
             os.system(cmd)

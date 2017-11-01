@@ -105,3 +105,11 @@ ENV/
 
 # result files for demo
 static/results
+
+# submit file and pics
+ckpt_from_server/
+model/
+submit/
+submit13/
+result/
+result13/
