@@ -99,7 +99,7 @@ def dice_coefficient(y_true_cls, y_pred_cls,
     '''
     # # loss之前进行focal操作应该是相当于把图片中每个box作为一个例子进行了“focal”
     gamma = 2
-    # alpha = 0.25
+    alpha = 0.25
     # pred_score = y_pred_cls * training_mask
     # focal_y_pred_cls = np.power(1 - y_pred_cls, gamma) * y_pred_cls
 
@@ -109,7 +109,10 @@ def dice_coefficient(y_true_cls, y_pred_cls,
         tf.reduce_sum(y_pred_cls * training_mask) + eps
     loss = 1. - (2 * intersection / union)
     # loss之后进行”focal“相当于把图片整体作为一个例子进行“focal”
+    # diceCoef = 2 * intersection / union + 1e-10
+    # loss = -1 * tf.pow(1 - diceCoef, gamma) * tf.log(diceCoef)
     tf.summary.scalar('classification_dice_loss', loss)
+
     return loss
 
 

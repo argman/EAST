@@ -71,7 +71,7 @@ def resize_image(im, max_side_len=2400):
 
 
 # 源代码中nms等于0.2
-def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_thres=0.203):
+def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_thres=0.2):
     '''
     restore text boxes from score map and geo map
     :param score_map:
