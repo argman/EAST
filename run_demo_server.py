@@ -14,10 +14,10 @@ import logging
 import collections
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
-@functools.lru_cache(maxsize=1)
+# @functools.lru_cache(maxsize=1)
 def get_host_info():
     ret = {}
     with open('/proc/cpuinfo') as f:
@@ -32,13 +32,13 @@ def get_host_info():
     return ret
 
 
-@functools.lru_cache(maxsize=100)
+# @functools.lru_cache(maxsize=100)
 def get_predictor(checkpoint_path):
     logger.info('loading model')
     import tensorflow as tf
     import model
     from icdar import restore_rectangle
-    import lanms
+    # import lanms
     from eval import resize_image, sort_poly, detect
 
     input_images = tf.placeholder(tf.float32, shape=[None, None, None, 3], name='input_images')
@@ -133,7 +133,7 @@ def get_predictor(checkpoint_path):
             'rtparams': rtparams,
             'timing': timer,
         }
-        ret.update(get_host_info())
+        # ret.update(get_host_info())
         return ret
 
 
@@ -141,7 +141,7 @@ def get_predictor(checkpoint_path):
 
 
 ### the webserver
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 import argparse
 
 
@@ -207,6 +207,18 @@ def index_post():
     return render_template('index.html', session_id=rst['session_id'])
 
 
+@app.route('/api', methods=['POST'])
+def api_post():
+    global predictor
+    import io
+    bio = io.BytesIO()
+    request.files['image'].save(bio)
+    img = cv2.imdecode(np.frombuffer(bio.getvalue(), dtype='uint8'), 1)
+    rst = get_predictor(checkpoint_path)(img)
+
+    return jsonify({'result': rst})
+
+
 def main():
     global checkpoint_path
     parser = argparse.ArgumentParser()
@@ -225,4 +237,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
