@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-@functools.lru_cache(maxsize=1)
+# @functools.lru_cache(maxsize=1)
 def get_host_info():
     ret = {}
     with open('/proc/cpuinfo') as f:
@@ -32,13 +32,13 @@ def get_host_info():
     return ret
 
 
-@functools.lru_cache(maxsize=100)
+# @functools.lru_cache(maxsize=100)
 def get_predictor(checkpoint_path):
     logger.info('loading model')
     import tensorflow as tf
     import model
     from icdar import restore_rectangle
-    import lanms
+    # import lanms
     from eval import resize_image, sort_poly, detect
 
     input_images = tf.placeholder(tf.float32, shape=[None, None, None, 3], name='input_images')
@@ -133,7 +133,7 @@ def get_predictor(checkpoint_path):
             'rtparams': rtparams,
             'timing': timer,
         }
-        ret.update(get_host_info())
+        # ret.update(get_host_info())
         return ret
 
 
