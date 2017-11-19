@@ -141,7 +141,7 @@ def get_predictor(checkpoint_path):
 
 
 ### the webserver
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 import argparse
 
 
@@ -205,6 +205,18 @@ def index_post():
 
     save_result(img, rst)
     return render_template('index.html', session_id=rst['session_id'])
+
+
+@app.route('/api', methods=['POST'])
+def api_post():
+    global predictor
+    import io
+    bio = io.BytesIO()
+    request.files['image'].save(bio)
+    img = cv2.imdecode(np.frombuffer(bio.getvalue(), dtype='uint8'), 1)
+    rst = get_predictor(checkpoint_path)(img)
+
+    return jsonify({'result': rst})
 
 
 def main():
