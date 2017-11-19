@@ -14,7 +14,7 @@ import logging
 import collections
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
 # @functools.lru_cache(maxsize=1)
@@ -225,4 +225,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
