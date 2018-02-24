@@ -603,7 +603,7 @@ def generator(input_size=512, batch_size=32,
                 h, w, _ = im.shape
                 txt_fn = im_fn.replace(os.path.basename(im_fn).split('.')[1], 'txt')
                 if not os.path.exists(txt_fn):
-                    print 'text file {} does not exists'.format(txt_fn)
+                    print('text file {} does not exists'.format(txt_fn))
                     continue
 
                 text_polys, text_tags = load_annoataion(txt_fn)
