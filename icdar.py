@@ -722,7 +722,8 @@ def generator(input_size=512, batch_size=32,
 def get_batch(num_workers, **kwargs):
     try:
         enqueuer = GeneratorEnqueuer(generator(**kwargs), use_multiprocessing=True)
-        enqueuer.start(max_queue_size=24, workers=num_workers)
+        print('Generator use 10 batches for buffering, this may take a while, you can tune this yourself.')
+        enqueuer.start(max_queue_size=10, workers=num_workers)
         generator_output = None
         while True:
             while enqueuer.is_running():
