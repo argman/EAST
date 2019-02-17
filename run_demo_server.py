@@ -153,6 +153,13 @@ config = Config()
 
 
 app = Flask(__name__)
+app.debug = True
+
+import tensorflow as tf
+# HACK
+tf.app.flags.DEFINE_string('bind', '', 'Server address')
+tf.app.flags.DEFINE_integer('timeout', 120, 'Server timeout')
+tf.app.flags.DEFINE_integer('workers', 3, 'Number of workers')
 
 @app.route('/')
 def index():
