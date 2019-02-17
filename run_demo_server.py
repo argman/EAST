@@ -211,8 +211,7 @@ def main():
     global checkpoint_path
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', default=8769, type=int)
-    parser.add_argument('--checkpoint-path', default=checkpoint_path)
-    parser.add_argument('--debug', action='store_true')
+    parser.add_argument('--checkpoint_path', default=checkpoint_path)
     args = parser.parse_args()
     checkpoint_path = args.checkpoint_path
 
@@ -220,7 +219,7 @@ def main():
         raise RuntimeError(
             'Checkpoint `{}` not found'.format(args.checkpoint_path))
 
-    app.debug = args.debug
+    app.debug = False  # change this to True if you want to debug
     app.run('0.0.0.0', args.port)
 
 if __name__ == '__main__':
