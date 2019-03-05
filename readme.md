@@ -35,8 +35,8 @@ Please cite his [paper](https://arxiv.org/abs/1704.03155v2) if you find this use
 1. [Installation](#installation)
 2. [Download](#download)
 2. [Demo](#demo)
-3. [Test](#train)
-4. [Train](#test)
+3. [Train](#train)
+4. [Test](#test)
 5. [Examples](#examples)
 
 ### Installation
