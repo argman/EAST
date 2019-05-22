@@ -13,6 +13,8 @@ import functools
 import logging
 import collections
 
+import traceback
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -20,15 +22,20 @@ logger.setLevel(logging.INFO)
 @functools.lru_cache(maxsize=1)
 def get_host_info():
     ret = {}
-    with open('/proc/cpuinfo') as f:
-        ret['cpuinfo'] = f.read()
+    """Handle /proc/cpuinfo file not found on OSX.
+    The demo server will crash in such a case."""
+    try:
+        with open('/proc/cpuinfo') as f:
+            ret['cpuinfo'] = f.read()
 
-    with open('/proc/meminfo') as f:
-        ret['meminfo'] = f.read()
+        with open('/proc/meminfo') as f:
+            ret['meminfo'] = f.read()
 
-    with open('/proc/loadavg') as f:
-        ret['loadavg'] = f.read()
-
+        with open('/proc/loadavg') as f:
+            ret['loadavg'] = f.read()
+    except Exception:
+        print(traceback.format_exc())
+        pass
     return ret
 
 
