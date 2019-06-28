@@ -96,5 +96,7 @@ Here are some test examples on icdar2015, enjoy the beautiful text boxes!
 ### Troubleshooting
 + How to compile lanms on Windows ?
   + See https://github.com/argman/EAST/issues/120
++ How to compile lanms with visual studio 2017 on Windows
+  + Double click lanms/lanms.cmd
 
 Please let me know if you encounter any issues(my email boostczc@gmail dot com).
