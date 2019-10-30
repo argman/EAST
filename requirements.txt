@@ -5,4 +5,4 @@ scipy==0.19.0
 plumbum==1.6.2
 numpy==1.12.1
 ipython==6.1.0
-Pillow==4.2.1
+Pillow==6.2.0
