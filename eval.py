@@ -1,3 +1,5 @@
+#python3 eval.py --test_data_path=./test_images/ --checkpoint_path=./east_icdar2015_resnet_v1_50_rbox/ --output_dir=./tmp/
+
 import cv2
 import time
 import math
