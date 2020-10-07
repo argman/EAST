@@ -17,22 +17,23 @@ def click_and_crop_cb(event, x, y, flags, params):
 
 	if event == cv2.EVENT_LBUTTONDOWN:
 		clickCoord = [(x,y),]
-		cropping = True
+		cropping = False
 
 	elif event == cv2.EVENT_LBUTTONUP:
 		clickCoord.append( (x,y) )
-		cropping = False
-		
-		cv2.rectangle(img, clickCoord[0], clickCoord[1], (0, 255, 0), 2)
-		cv2.imshow("image", img)
-		cv2.waitKey(0)
+		cropping = True
 
 
 cv2.setMouseCallback("img", click_and_crop_cb)
 
 while True:
 	cv2.imshow('img', img)
-	cv2.waitKey(0)
-	cv2.destroyAllWindows() 
-	a = 1
+	cv2.waitKey(3)
+	#cv2.destroyAllWindows() 
+	if cropping is True:
+		cv2.rectangle(img, clickCoord[0], clickCoord[1], (0, 255, 0), 2)
+		#cv2.imshow("image", img)
+		#cv2.waitKey(3)
+		print(  len(clickCoord)  )
+		cropping = False
 	#print(clickCoord)
