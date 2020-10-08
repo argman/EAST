@@ -79,17 +79,9 @@ def crop(img, clickCoord):
     return resized, croppedImg
 
 
-cv2.setMouseCallback("img", click_and_crop_cb)
-
-
-while True:
-    
-    cv2.imshow('img', img)
-    cv2.waitKey(3)
-    #cv2.destroyAllWindows() 
-    if cropping is True:
-        print("In")
-        if len(clickCoord) == 2:
+def checkROI(img, clickCoord):
+    validROI = 0;    # 0 for non-valid, 1 for tiny/click, 2 for valid zoom
+    if len(clickCoord) == 2:
             #cv2.rectangle(img, clickCoord[0], clickCoord[1], (0, 255, 0), 2)
             if (clickCoord[0][0]>clickCoord[1][0]) or (clickCoord[0][1]>clickCoord[1][1]):
                 temp = clickCoord[0][0]
@@ -98,8 +90,36 @@ while True:
                 temp = clickCoord[0][1]
                 clickCoord[0][1] = clickCoord[1][1]
                 clickCoord[1][1] = temp
-            img, cropped =  crop(img, clickCoord)
-            #print(  len(clickCoord)  )
-        clickCoord = []
+            print(clickCoord[1][0]-clickCoord[0][0])
+            print(clickCoord[1][1]-clickCoord[0][1])
+            if (clickCoord[1][0]-clickCoord[0][0] < 20) or (clickCoord[1][1]-clickCoord[0][1] < 20):
+                print("Tiny ROI selected")
+                validROI = 1;
+            else:
+                validROI = 2;
+            #img, cropped =  crop(img, clickCoord)
+            #print(  len(e)  )
+
+    return clickCoord, validROI
+
+
+cv2.setMouseCallback("img", click_and_crop_cb)
+
+
+
+while True:
+    
+    cv2.imshow('img', img)
+    cv2.waitKey(3)
+    #cv2.destroyAllWindows() 
+    if cropping is True:
+        clickCoord, validROI = checkROI(img, clickCoord)
+        if validROI == 1:
+            img = original_img
+        elif validROI == 2:
+            print("INTO VALID ROI")
+            img, img_cropped = crop(img, clickCoord)
         cropping = False
+        clickCoord = []
+        
 
