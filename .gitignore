@@ -105,3 +105,6 @@ ENV/
 
 # result files for demo
 static/results
+
+# model files
+models/

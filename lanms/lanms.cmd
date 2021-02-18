@@ -11,6 +11,7 @@ if exist %python_path% (
 )
 
 set vs2017_path="C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Auxiliary/Build/vcvars64.bat"
+rem set vs2017_path="C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Auxiliary/Build/vcvars64.bat"
 if exist %vs2017_path% (
   call %vs2017_path%
   del adaptor.pyd

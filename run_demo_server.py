@@ -19,6 +19,10 @@ logger.setLevel(logging.INFO)
 
 @functools.lru_cache(maxsize=1)
 def get_host_info():
+    return {'cpuinfo': 'cpuinfo',
+            'meminfo': 'meminfo',
+            'loadavg': 'loadavg'}
+
     ret = {}
     with open('/proc/cpuinfo') as f:
         ret['cpuinfo'] = f.read()
@@ -30,7 +34,6 @@ def get_host_info():
         ret['loadavg'] = f.read()
 
     return ret
-
 
 @functools.lru_cache(maxsize=100)
 def get_predictor(checkpoint_path):
@@ -191,7 +194,7 @@ def save_result(img, rst):
 
 
 
-checkpoint_path = './east_icdar2015_resnet_v1_50_rbox'
+checkpoint_path = './models/east_icdar2015_resnet_v1_50_rbox'
 
 
 @app.route('/', methods=['POST'])
