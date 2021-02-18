@@ -11,13 +11,13 @@ endif(WIN32)
 
 find_package (Python3 REQUIRED COMPONENTS Interpreter Development)
 
-set(SOURCES "lanms.cpp" "adaptor.cpp" "include/clipper/clipper.cpp")
-add_library(lanms_library SHARED ${SOURCES})
+set(SOURCES "lanms.cpp" "include/clipper/clipper.cpp")
+
+add_library(lanms_library SHARED "adaptor.cpp" ${SOURCES})
 target_link_libraries(lanms_library ${Python3_LIBRARIES})
 target_include_directories(lanms_library PUBLIC ${CMAKE_CURRENT_LIST_DIR} ${Python3_INCLUDE_DIRS})
 
 include_directories("include")
-include_directories(${Python3_INCLUDE_DIRS})
 
 add_executable(main main.cpp ${SOURCES})
-target_link_libraries(main lanms_library)
+target_link_libraries(main)
