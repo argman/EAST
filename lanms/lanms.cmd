@@ -15,7 +15,7 @@ rem set vs2017_path="C:/Program Files (x86)/Microsoft Visual Studio/2019/Communi
 if exist %vs2017_path% (
   call %vs2017_path%
   del adaptor.pyd
-  cl adaptor.cpp ./include/clipper/clipper.cpp /I ./include /I %python_dir%/include /LD /Fe:adaptor.pyd /link/LIBPATH:%python_dir%/libs
+  cl lanms.cpp adaptor.cpp ./include/clipper/clipper.cpp /I ./include /I %python_dir%/include /LD /Fe:adaptor.pyd /link/LIBPATH:%python_dir%/libs
   del adaptor.exp adaptor.obj clipper.obj adaptor.lib
 ) else (
   @echo can't found vs2017, please set vs2017_path manually at line 14, example:
