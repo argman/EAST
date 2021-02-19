@@ -5,7 +5,7 @@ import platform
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
-if platform.system() != "Windows":
+if platform.system() != 'Windows':
     if subprocess.call(['make', '-C', BASE_DIR]) != 0:  # return value
         raise RuntimeError('Cannot compile lanms: {}'.format(BASE_DIR))
 

@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 import uuid
 import json
+import platform
 
 import functools
 import logging
@@ -19,9 +20,10 @@ logger.setLevel(logging.INFO)
 
 @functools.lru_cache(maxsize=1)
 def get_host_info():
-    return {'cpuinfo': 'cpuinfo',
-            'meminfo': 'meminfo',
-            'loadavg': 'loadavg'}
+    if platform.system() == 'Windows':
+        return {'cpuinfo': 'cpuinfo',
+                'meminfo': 'meminfo',
+                'loadavg': 'loadavg'}
 
     ret = {}
     with open('/proc/cpuinfo') as f:
