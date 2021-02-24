@@ -108,3 +108,10 @@ static/results
 
 # model files
 models/
+
+# binary images
+*.jpg
+*.png
+
+# output directory
+outputs/

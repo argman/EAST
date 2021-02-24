@@ -169,7 +169,7 @@ def draw_illu(illu, rst):
         d = np.array([t['x0'], t['y0'], t['x1'], t['y1'], t['x2'],
                       t['y2'], t['x3'], t['y3']], dtype='int32')
         d = d.reshape(-1, 2)
-        cv2.polylines(illu, [d], isClosed=True, color=(255, 255, 0))
+        cv2.polylines(illu, [d], isClosed=True, color=(255, 255, 0), lineType=cv2.LINE_AA)
     return illu
 
 
@@ -229,4 +229,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
