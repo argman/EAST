@@ -11,10 +11,10 @@ def rst2np(rst):
         boxes.append(d.reshape((4, 2)))
     return boxes
 
-tet_data_path = 'training_samples'
-print(tet_data_path)
-imgnames = [f for f in os.listdir(tet_data_path)
-            if os.path.isfile(os.path.join(tet_data_path, f))
+test_data_path = 'training_samples'
+print(test_data_path)
+imgnames = [f for f in os.listdir(test_data_path)
+            if os.path.isfile(os.path.join(test_data_path, f))
             and os.path.splitext(f)[1] != '.txt']
 assert len(imgnames)
 
@@ -26,10 +26,11 @@ model_loaded = False
 
 winname = 'EAST'
 cv.namedWindow(winname, cv.WINDOW_KEEPRATIO)
+wait_ms = 0
 
 for imgname in imgnames:
     # read test image
-    imgpath = os.path.join(tet_data_path, imgname)
+    imgpath = os.path.join(test_data_path, imgname)
     img = cv.imread(imgpath, cv.IMREAD_COLOR)
     if img is None:
         print('%s is not an image! Skipping...' % imgpath)
@@ -70,7 +71,7 @@ for imgname in imgnames:
     illu = cv.polylines(img, boxes, isClosed=True, color=(255, 255, 0),
                         thickness=3, lineType=cv.LINE_AA)
     cv.imshow(winname, illu)
-    ch = cv.waitKey() & 0xFF
+    ch = cv.waitKey(wait_ms) & 0xFF
 
     if chr(ch).lower() == 's':
         outname = os.path.join(output_dir, imgname)
