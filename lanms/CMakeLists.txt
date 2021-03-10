@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.4)
 project(lanms)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -9,15 +9,18 @@ else(WIN32)
   add_compile_options(-pthread)
 endif(WIN32)
 
-find_package (Python3 REQUIRED COMPONENTS Interpreter Development)
-
 set(SOURCES "lanms.cpp" "include/clipper/clipper.cpp")
 
-add_library(lanms_library SHARED "adaptor.cpp" ${SOURCES})
-target_link_libraries(lanms_library ${Python3_LIBRARIES})
-target_include_directories(lanms_library PUBLIC ${CMAKE_CURRENT_LIST_DIR} ${Python3_INCLUDE_DIRS})
+add_library(lanms_library SHARED ${SOURCES})
+target_link_libraries(lanms_library)
+target_include_directories(lanms_library PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 include_directories("include")
 
 add_executable(main main.cpp ${SOURCES})
 target_link_libraries(main)
+
+add_subdirectory("pybind11")
+pybind11_add_module(adaptor "adaptor.cpp" ${SOURCES})
+target_link_libraries(adaptor PRIVATE lanms_library)
+target_compile_definitions(adaptor PRIVATE)

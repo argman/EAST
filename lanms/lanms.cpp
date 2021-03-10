@@ -1,4 +1,6 @@
 #include "lanms.h"
+#include <limits>
+#include <algorithm>
 
 namespace lanms {
     namespace cl = ClipperLib;
