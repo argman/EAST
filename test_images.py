@@ -3,6 +3,10 @@ import cv2 as cv
 import os
 import numpy as np
 
+import flags
+import tensorflow as tf
+FLAGS = tf.app.flags.FLAGS
+
 def rst2np(rst):
     boxes = []
     for t in rst['text_lines']:
@@ -11,17 +15,14 @@ def rst2np(rst):
         boxes.append(d.reshape((4, 2)))
     return boxes
 
-test_data_path = 'training_samples'
-print(test_data_path)
-imgnames = [f for f in os.listdir(test_data_path)
-            if os.path.isfile(os.path.join(test_data_path, f))
+print('path to images:', FLAGS.test_data_path)
+imgnames = [f for f in os.listdir(FLAGS.test_data_path)
+            if os.path.isfile(os.path.join(FLAGS.test_data_path, f))
             and os.path.splitext(f)[1] != '.txt']
 assert len(imgnames)
 
-output_dir = 'outputs'
-os.makedirs(output_dir, exist_ok=True)
+os.makedirs(FLAGS.output_dir, exist_ok=True)
 
-model_path = 'models/east_icdar2015_resnet_v1_50_rbox'
 model_loaded = False
 
 winname = 'EAST'
@@ -30,19 +31,19 @@ wait_ms = 0
 
 for imgname in imgnames:
     # read test image
-    imgpath = os.path.join(test_data_path, imgname)
+    imgpath = os.path.join(FLAGS.test_data_path, imgname)
     img = cv.imread(imgpath, cv.IMREAD_COLOR)
     if img is None:
         print('%s is not an image! Skipping...' % imgpath)
         continue
 
     # detect text boxes if not previously detected
-    outpath = os.path.join(output_dir, 'res_' + os.path.splitext(imgname)[0] + '.txt')
+    outpath = os.path.join(FLAGS.output_dir, 'res_' + os.path.splitext(imgname)[0] + '.txt')
     if not os.path.isfile(outpath):
         print('Detecting text boxes for %s' % imgname)
         if not model_loaded:
-            print('Loading model from %s' % model_path)
-            predict = get_predictor(model_path)
+            print('Loading model from %s' % FLAGS.checkpoint_path)
+            predict = get_predictor(FLAGS.checkpoint_path)
             model_loaded = True
         rst = predict(img)
         print('Process took %.2f seconds' % (rst['timing']['overall']))

@@ -48,6 +48,36 @@ else
   echo "$modelname exists"
 fi
 
+# modify checkpoint path manually
+cd "$modelname"
+if [ ! -f checkpoint.orig ]; then
+mv checkpoint checkpoint.orig
+cat > checkpoint <<-EOF
+model_checkpoint_path: "model.ckpt-49491"
+all_model_checkpoint_paths: "model.ckpt-49491"
+EOF
+fi
+
+# required for training
+cd "$root/models/"
+ckptname="resnet_v1_50.ckpt"
+if [ ! -f "$ckptname" ]
+then
+  echo "Downloading $ckptname"
+  ckpturl='http://download.tensorflow.org/models/resnet_v1_50_2016_08_28.tar.gz'
+  tarname="resnet_v1_50_2016_08_28.tar.gz"
+  if [ ! -f "$tarname" ]
+  then
+    wget "$ckpturl"
+  else
+    echo "$tarname exists"
+  fi
+  tar -xvzf "$tarname"
+  echo "Deleting $tarname" && rm "$tarname"
+else
+  echo "$ckptname exists"
+fi
+
 # compile lanms
 cd "$root/lanms"
 mkdir -p build
@@ -59,3 +89,5 @@ cp adaptor.cpython-* ..
 # install python requirements
 cd "$root"
 pip3 install -r test_requirements.txt
+
+echo DONE

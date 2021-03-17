@@ -3,12 +3,10 @@ import numpy as np
 
 from tensorflow.contrib import slim
 
-tf.app.flags.DEFINE_integer('text_scale', 512, '')
-
 from nets import resnet_v1
 
+import flags
 FLAGS = tf.app.flags.FLAGS
-
 
 def unpool(inputs):
     return tf.image.resize_bilinear(inputs, size=[tf.shape(inputs)[1]*2,  tf.shape(inputs)[2]*2])
