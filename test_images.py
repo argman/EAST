@@ -75,7 +75,7 @@ for imgname in imgnames:
     ch = cv.waitKey(wait_ms) & 0xFF
 
     if chr(ch).lower() == 's':
-        outname = os.path.join(output_dir, imgname)
+        outname = os.path.join(FLAGS.output_dir, imgname)
         if cv.imwrite(outname, illu):
             print('Wrote out %s' % outname)
         else:
