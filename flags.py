@@ -1,14 +1,14 @@
 import tensorflow as tf
 
 # required for both training and testing
-tf.app.flags.DEFINE_string('checkpoint_path', 'models/east_icdar2015_resnet_v1_50_rbox',
+tf.app.flags.DEFINE_string('checkpoint_path', './models/east_icdar2015_resnet_v1_50_rbox',
                            'model folder that contains checkpoint, index and meta')
 tf.app.flags.DEFINE_integer('text_scale', 512, '')
 
 # testing parameters
-tf.app.flags.DEFINE_string('test_data_path', 'training_samples',
+tf.app.flags.DEFINE_string('test_data_path', './training_samples',
                            'folder that contains images to test')
-tf.app.flags.DEFINE_string('output_dir', 'outputs',
+tf.app.flags.DEFINE_string('output_dir', './outputs',
                            'result will be written to this folder')
 tf.app.flags.DEFINE_bool('no_write_images', False,
                          'do not write images')

@@ -59,10 +59,9 @@ def main(argv=None):
     os.environ['CUDA_VISIBLE_DEVICES'] = FLAGS.gpu_list
     if not tf.gfile.Exists(FLAGS.checkpoint_path):
         tf.gfile.MkDir(FLAGS.checkpoint_path)
-    else:
-        if not FLAGS.restore:
-            tf.gfile.DeleteRecursively(FLAGS.checkpoint_path)
-            tf.gfile.MkDir(FLAGS.checkpoint_path)
+    elif not FLAGS.restore:
+        tf.gfile.DeleteRecursively(FLAGS.checkpoint_path)
+        tf.gfile.MkDir(FLAGS.checkpoint_path)
 
     input_images = tf.placeholder(tf.float32, shape=[None, None, None, 3], name='input_images')
     input_score_maps = tf.placeholder(tf.float32, shape=[None, None, None, 1], name='input_score_maps')
@@ -107,8 +106,7 @@ def main(argv=None):
 
     summary_op = tf.summary.merge_all()
     # save moving average
-    variable_averages = tf.train.ExponentialMovingAverage(
-        FLAGS.moving_average_decay, global_step)
+    variable_averages = tf.train.ExponentialMovingAverage(FLAGS.moving_average_decay, global_step)
     variables_averages_op = variable_averages.apply(tf.trainable_variables())
     # batch norm updates
     with tf.control_dependencies([variables_averages_op, apply_gradient_op, batch_norm_updates_op]):
@@ -155,7 +153,7 @@ def main(argv=None):
                     step, ml, tl, avg_time_per_step, avg_examples_per_second))
 
             if step % FLAGS.save_checkpoint_steps == 0:
-                saver.save(sess, FLAGS.checkpoint_path + 'model.ckpt', global_step=global_step)
+                saver.save(sess, FLAGS.checkpoint_path + '/model.ckpt', global_step=global_step)
 
             if step % FLAGS.save_summary_steps == 0:
                 _, tl, summary_str = sess.run([train_op, total_loss, summary_op], feed_dict={input_images: data[0],
