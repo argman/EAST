@@ -115,3 +115,6 @@ models/
 
 # output directory
 outputs/
+
+# training dataset directory
+data/

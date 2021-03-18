@@ -153,6 +153,7 @@ def main(argv=None):
                     step, ml, tl, avg_time_per_step, avg_examples_per_second))
 
             if step % FLAGS.save_checkpoint_steps == 0:
+                print('Saving checkpoint %d' % step)
                 saver.save(sess, FLAGS.checkpoint_path + '/model.ckpt', global_step=global_step)
 
             if step % FLAGS.save_summary_steps == 0:
@@ -160,6 +161,7 @@ def main(argv=None):
                                                                                              input_score_maps: data[2],
                                                                                              input_geo_maps: data[3],
                                                                                              input_training_masks: data[4]})
+                print('Saving summary %d' % step)
                 summary_writer.add_summary(summary_str, global_step=step)
 
 if __name__ == '__main__':
