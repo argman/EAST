@@ -105,3 +105,16 @@ ENV/
 
 # result files for demo
 static/results
+
+# model files
+models/
+
+# binary images
+*.jpg
+*.png
+
+# output directory
+outputs/
+
+# training dataset directory
+data/

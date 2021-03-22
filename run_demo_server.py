@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 import uuid
 import json
+import platform
 
 import functools
 import logging
@@ -19,6 +20,11 @@ logger.setLevel(logging.INFO)
 
 @functools.lru_cache(maxsize=1)
 def get_host_info():
+    if platform.system() == 'Windows':
+        return {'cpuinfo': 'cpuinfo',
+                'meminfo': 'meminfo',
+                'loadavg': 'loadavg'}
+
     ret = {}
     with open('/proc/cpuinfo') as f:
         ret['cpuinfo'] = f.read()
@@ -30,7 +36,6 @@ def get_host_info():
         ret['loadavg'] = f.read()
 
     return ret
-
 
 @functools.lru_cache(maxsize=100)
 def get_predictor(checkpoint_path):
@@ -164,7 +169,7 @@ def draw_illu(illu, rst):
         d = np.array([t['x0'], t['y0'], t['x1'], t['y1'], t['x2'],
                       t['y2'], t['x3'], t['y3']], dtype='int32')
         d = d.reshape(-1, 2)
-        cv2.polylines(illu, [d], isClosed=True, color=(255, 255, 0))
+        cv2.polylines(illu, [d], isClosed=True, color=(255, 255, 0), lineType=cv2.LINE_AA)
     return illu
 
 
@@ -191,7 +196,7 @@ def save_result(img, rst):
 
 
 
-checkpoint_path = './east_icdar2015_resnet_v1_50_rbox'
+checkpoint_path = './models/east_icdar2015_resnet_v1_50_rbox'
 
 
 @app.route('/', methods=['POST'])
@@ -224,4 +229,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

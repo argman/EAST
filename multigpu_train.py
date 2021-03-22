@@ -3,22 +3,10 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.contrib import slim
 
-tf.app.flags.DEFINE_integer('input_size', 512, '')
-tf.app.flags.DEFINE_integer('batch_size_per_gpu', 14, '')
-tf.app.flags.DEFINE_integer('num_readers', 16, '')
-tf.app.flags.DEFINE_float('learning_rate', 0.0001, '')
-tf.app.flags.DEFINE_integer('max_steps', 100000, '')
-tf.app.flags.DEFINE_float('moving_average_decay', 0.997, '')
-tf.app.flags.DEFINE_string('gpu_list', '1', '')
-tf.app.flags.DEFINE_string('checkpoint_path', '/tmp/east_resnet_v1_50_rbox/', '')
-tf.app.flags.DEFINE_boolean('restore', False, 'whether to resotre from checkpoint')
-tf.app.flags.DEFINE_integer('save_checkpoint_steps', 1000, '')
-tf.app.flags.DEFINE_integer('save_summary_steps', 100, '')
-tf.app.flags.DEFINE_string('pretrained_model_path', None, '')
-
 import model
 import icdar
 
+import flags
 FLAGS = tf.app.flags.FLAGS
 
 gpus = list(range(len(FLAGS.gpu_list.split(','))))
@@ -71,10 +59,9 @@ def main(argv=None):
     os.environ['CUDA_VISIBLE_DEVICES'] = FLAGS.gpu_list
     if not tf.gfile.Exists(FLAGS.checkpoint_path):
         tf.gfile.MkDir(FLAGS.checkpoint_path)
-    else:
-        if not FLAGS.restore:
-            tf.gfile.DeleteRecursively(FLAGS.checkpoint_path)
-            tf.gfile.MkDir(FLAGS.checkpoint_path)
+    elif not FLAGS.restore:
+        tf.gfile.DeleteRecursively(FLAGS.checkpoint_path)
+        tf.gfile.MkDir(FLAGS.checkpoint_path)
 
     input_images = tf.placeholder(tf.float32, shape=[None, None, None, 3], name='input_images')
     input_score_maps = tf.placeholder(tf.float32, shape=[None, None, None, 1], name='input_score_maps')
@@ -119,8 +106,7 @@ def main(argv=None):
 
     summary_op = tf.summary.merge_all()
     # save moving average
-    variable_averages = tf.train.ExponentialMovingAverage(
-        FLAGS.moving_average_decay, global_step)
+    variable_averages = tf.train.ExponentialMovingAverage(FLAGS.moving_average_decay, global_step)
     variables_averages_op = variable_averages.apply(tf.trainable_variables())
     # batch norm updates
     with tf.control_dependencies([variables_averages_op, apply_gradient_op, batch_norm_updates_op]):
@@ -167,13 +153,15 @@ def main(argv=None):
                     step, ml, tl, avg_time_per_step, avg_examples_per_second))
 
             if step % FLAGS.save_checkpoint_steps == 0:
-                saver.save(sess, FLAGS.checkpoint_path + 'model.ckpt', global_step=global_step)
+                print('Saving checkpoint %d' % step)
+                saver.save(sess, FLAGS.checkpoint_path + '/model.ckpt', global_step=global_step)
 
             if step % FLAGS.save_summary_steps == 0:
                 _, tl, summary_str = sess.run([train_op, total_loss, summary_op], feed_dict={input_images: data[0],
                                                                                              input_score_maps: data[2],
                                                                                              input_geo_maps: data[3],
                                                                                              input_training_masks: data[4]})
+                print('Saving summary %d' % step)
                 summary_writer.add_summary(summary_str, global_step=step)
 
 if __name__ == '__main__':
